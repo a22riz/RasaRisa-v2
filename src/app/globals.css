@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme {
+  --color-tomato: #e63946;
+  --color-turmeric: #f4a261;
+  --color-cream: #fff3e0;
+  --color-card: #ffffff;
+  --color-ink: #1d1d1d;
+  --color-ink-muted: #555555;
+  --color-soft-grey: #e8e2d5;
+  --color-leaf: #388e3c;
+  --color-danger: #d32f2f;
+
+  --font-serif: "Fraunces", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+  }
+}
+
+/* Focus visible: 2-3px outline, never outline:none without replacement */
+@layer base {
+  *:focus-visible {
+    outline: 2px solid var(--color-tomato);
+    outline-offset: 2px;
+  }
+}
+
+/* Tap targets: minimum 44px on mobile */
+@layer base {
+  @media (pointer: coarse) {
+    button, a, [role="button"], input[type="checkbox"], input[type="radio"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+}

@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Int
+  image       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  poItems     PoItem[]
+  orderItems  OrderItem[]
+
+  @@index([isActive])
+}
+
+model PoBatch {
+  id        String   @id @default(cuid())
+  readyDate DateTime
+  closeDate DateTime
+  status    PoStatus @default(OPEN)
+  poItems   PoItem[]
+  orderItems OrderItem[]
+  createdAt DateTime @default(now())
+
+  @@index([status])
+  @@index([readyDate])
+  @@index([closeDate])
+}
+
+enum PoStatus {
+  OPEN
+  CLOSED
+}
+
+model PoItem {
+  id            String   @id @default(cuid())
+  productId     String
+  poBatchId     String
+  priceOverride Int?
+  product       Product  @relation(fields: [productId], references: [id])
+  poBatch       PoBatch  @relation(fields: [poBatchId], references: [id])
+
+  @@unique([productId, poBatchId])
+}
+
+model Order {
+  id                 String      @id @default(cuid())
+  orderNumber        String      @unique
+  trackingId         String      @unique
+  buyerName          String
+  buyerWa            String
+  fulfillment        Fulfillment
+  address            String?
+  status             OrderStatus @default(WAITING_PAYMENT)
+  receiptImage       String?
+  receiptUploadedAt  DateTime?
+  paymentConfirmedAt DateTime?
+  expiresAt          DateTime
+  totalAmount        Int
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  items              OrderItem[]
+  statusHistory      StatusHistory[]
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([buyerWa])
+}
+
+enum Fulfillment {
+  PICKUP
+  DELIVERY
+}
+
+enum OrderStatus {
+  WAITING_PAYMENT
+  PAYMENT_CONFIRMED
+  PROCESSING
+  READY_FOR_DELIVERY
+  COMPLETED
+  EXPIRED
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  poBatchId String
+  productId String
+  quantity  Int
+  price     Int
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  poBatch   PoBatch  @relation(fields: [poBatchId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([poBatchId])
+}
+
+model StatusHistory {
+  id        String      @id @default(cuid())
+  orderId   String
+  status    OrderStatus
+  note      String?
+  createdAt DateTime    @default(now())
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+model Admin {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  passwordHash   String
+  failedAttempts Int       @default(0)
+  lockedUntil    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
