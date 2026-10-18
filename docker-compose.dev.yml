@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: rasarisa
+      POSTGRES_PASSWORD: rasarisa
+      POSTGRES_DB: rasarisa
+    volumes:
+      - db-dev:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  db-dev:

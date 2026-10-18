@@ -41,7 +41,7 @@ export default async function AdminLayout({
             </Link>
           ))}
         </nav>
-        <div className="hidden p-2 lg:block">
+        <div className="p-2">
           <form action={adminLogout}>
             <button
               type="submit"
