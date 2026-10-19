@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getCatalog } from "@/server/orders";
 import { getCart, cartItemCount } from "@/lib/cart";
-import { formatCurrency, formatPoLabel, formatDate, formatDateShort } from "@/lib/format";
+import { formatCurrency, formatPoLabel, formatDateShort } from "@/lib/format";
 import { AddToCartButton } from "@/components/buyer/add-to-cart-button";
 import { Logo } from "@/components/logo";
 
@@ -75,17 +75,26 @@ export default async function CatalogPage() {
         <div className="max-w-[1120px] mx-auto px-6 pb-7">
           <p className="text-[13px] text-ink-muted mb-2.5 font-medium">Pilih tanggal ready:</p>
           <div className="flex gap-2.5 flex-wrap">
-            {batches.map((batch, idx) => (
-              <a
-                key={batch.id}
-                href={`#po-${batch.id}`}
-                className={`rr-filter-chip ${idx === 0 ? "active" : ""}`}
-                style={{ flexDirection: "column", alignItems: "flex-start", minWidth: 160, padding: "12px 18px" }}
-              >
-                <span className="font-semibold text-[15px]">{formatPoLabel(batch.readyDate).replace("PO ", "")}</span>
-                <span className="text-xs opacity-70">Tutup {formatDateShort(batch.closeDate)}</span>
-              </a>
-            ))}
+            {batches.map((batch, idx) => {
+              const ready = new Date(batch.readyDate);
+              const weekday = new Intl.DateTimeFormat("id-ID", { weekday: "short" }).format(ready);
+              return (
+                <a
+                  key={batch.id}
+                  href={`#po-${batch.id}`}
+                  className={`rr-po-chip ${idx === 0 ? "active" : ""}`}
+                >
+                  <span className="rr-po-chip-date">
+                    <span className="day">{weekday}</span>
+                    <span className="num">{ready.getDate()}</span>
+                  </span>
+                  <span className="rr-po-chip-meta">
+                    <span className="title">Ready {weekday}, {ready.getDate()} Okt</span>
+                    <span className="sub">Tutup {formatDateShort(batch.closeDate)}</span>
+                  </span>
+                </a>
+              );
+            })}
           </div>
         </div>
       )}
@@ -102,7 +111,7 @@ export default async function CatalogPage() {
         </div>
       ) : (
         batches.map((batch, batchIdx) => (
-          <section key={batch.id} id={`#po-${batch.id}`} className="max-w-[1120px] mx-auto px-6 pb-14">
+          <section key={batch.id} id={`po-${batch.id}`} className="max-w-[1120px] mx-auto px-6 pb-14 scroll-mt-20">
             <div
               id="menu"
               className="flex justify-between items-end mb-6 border-b border-soft-grey pb-3.5"

@@ -408,6 +408,45 @@
 .rr-po-date-badge .day { font-size: 11px; font-weight: 600; color: var(--color-ink-muted); text-transform: uppercase; }
 .rr-po-date-badge .num { font-family: var(--font-serif); font-size: 20px; font-weight: 700; line-height: 1; }
 
+/* PO selector chip (buyer catalog) */
+.rr-po-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px 10px 10px;
+  border-radius: 14px;
+  border: 1px solid var(--color-soft-grey);
+  background: var(--color-card);
+  text-decoration: none;
+  transition: border-color 0.15s, transform 0.15s, background 0.15s;
+  font-family: inherit;
+}
+.rr-po-chip:hover { border-color: var(--color-tomato); transform: translateY(-1px); }
+.rr-po-chip.active {
+  border-color: var(--color-tomato);
+  background: rgba(230, 57, 70, 0.04);
+  box-shadow: 0 4px 12px rgba(230, 57, 70, 0.1);
+}
+.rr-po-chip-date {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  background: var(--color-cream);
+  border: 1px solid var(--color-soft-grey);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.rr-po-chip-date .day { font-size: 10px; font-weight: 600; color: var(--color-ink-muted); text-transform: uppercase; line-height: 1; }
+.rr-po-chip-date .num { font-family: var(--font-serif); font-size: 18px; font-weight: 700; line-height: 1.1; color: var(--color-ink); }
+.rr-po-chip.active .rr-po-chip-date { background: var(--color-tomato); border-color: var(--color-tomato); }
+.rr-po-chip.active .rr-po-chip-date .day,
+.rr-po-chip.active .rr-po-chip-date .num { color: white; }
+.rr-po-chip-meta { display: flex; flex-direction: column; gap: 1px; }
+.rr-po-chip-meta .title { font-size: 13px; font-weight: 600; color: var(--color-ink); white-space: nowrap; }
+.rr-po-chip-meta .sub { font-size: 11px; color: var(--color-ink-muted); white-space: nowrap; }
+
 /* PO status pill (admin) */
 .rr-po-status { padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; text-align: center; }
 .rr-po-status.open { background: rgba(56, 142, 60, 0.12); color: var(--color-leaf); }
