@@ -17,9 +17,9 @@ export function AddToCartButton({
       type="button"
       disabled={isPending}
       onClick={() => startTransition(async () => { await addItem(productId, poBatchId, 1); })}
-      className="rounded-lg bg-tomato px-4 py-2 text-sm font-semibold text-white transition hover:bg-tomato/90 disabled:opacity-50"
+      className="bg-tomato text-white rounded-lg px-4 py-2 text-[13px] font-semibold transition hover:bg-tomato-dark disabled:opacity-50"
     >
-      {isPending ? "..." : "Tambah"}
+      {isPending ? "..." : "+ Tambah"}
     </button>
   );
 }

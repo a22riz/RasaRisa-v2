@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import { submitCheckout } from "@/app/actions/order";
-import { formatCurrency } from "@/lib/format";
 import type { Cart } from "@/lib/validation";
 
 interface CartLine {
@@ -16,8 +15,8 @@ interface CartLine {
 
 export function CheckoutForm({
   cart,
-  lines,
-  total,
+  lines: _lines,
+  total: _total,
 }: {
   cart: Cart;
   lines: CartLine[];
@@ -25,7 +24,7 @@ export function CheckoutForm({
 }) {
   const [buyerName, setBuyerName] = useState("");
   const [buyerWa, setBuyerWa] = useState("");
-  const [fulfillment, setFulfillment] = useState<"PICKUP" | "DELIVERY">("PICKUP");
+  const [fulfillment, setFulfillment] = useState<"PICKUP" | "DELIVERY">("DELIVERY");
   const [address, setAddress] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -48,83 +47,82 @@ export function CheckoutForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <h2 className="font-serif text-xl font-bold text-ink">Data Pemesan</h2>
-        <div className="mt-4 space-y-4">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-ink">
-              Nama
+    <form id="checkout-form" onSubmit={handleSubmit} className="contents">
+      {/* Fulfillment */}
+      <div className="rr-card">
+        <h2>Pengiriman</h2>
+        <p className="rr-card-sub">Pilih cara kamu mau terima pesanan.</p>
+
+        <div className="grid grid-cols-2 gap-3 mb-4.5">
+          <button
+            type="button"
+            onClick={() => setFulfillment("DELIVERY")}
+            className={`rr-fulfill-opt ${fulfillment === "DELIVERY" ? "selected" : ""}`}
+          >
+            <span className="fo-icon">🛵</span>
+            <div className="fo-title">Antar ke rumah</div>
+            <div className="fo-desc">Gratis, kami antar sendiri ke alamatmu.</div>
+          </button>
+          <button
+            type="button"
+            onClick={() => setFulfillment("PICKUP")}
+            className={`rr-fulfill-opt ${fulfillment === "PICKUP" ? "selected" : ""}`}
+          >
+            <span className="fo-icon">🏪</span>
+            <div className="fo-title">Ambil sendiri</div>
+            <div className="fo-desc">Pickup di lokasi kami sesuai jadwal ready.</div>
+          </button>
+        </div>
+
+        {fulfillment === "DELIVERY" && (
+          <div className="rr-field" style={{ marginBottom: 0 }}>
+            <label>
+              Alamat pengiriman <span className="req">*</span>
+            </label>
+            <textarea
+              rows={2}
+              required
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Jl. Melati No. 12, Bandung"
+            />
+            <p className="hint">Contoh: nama jalan, nomor rumah, RT/RW, kelurahan.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Buyer data */}
+      <div className="rr-card">
+        <h2>Data Pemesan</h2>
+        <p className="rr-card-sub">Untuk konfirmasi pesanan dan link tracking.</p>
+
+        <div className="grid grid-cols-2 gap-3.5">
+          <div className="rr-field" style={{ marginBottom: 0 }}>
+            <label>
+              Nama <span className="req">*</span>
             </label>
             <input
-              id="name"
               type="text"
               required
               value={buyerName}
               onChange={(e) => setBuyerName(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-soft-grey bg-card px-3 py-2 text-ink"
               placeholder="Nama lengkap"
             />
           </div>
-          <div>
-            <label htmlFor="wa" className="block text-sm font-medium text-ink">
-              Nomor WhatsApp
+          <div className="rr-field" style={{ marginBottom: 0 }}>
+            <label>
+              Nomor WhatsApp <span className="req">*</span>
             </label>
             <input
-              id="wa"
               type="tel"
               required
               value={buyerWa}
               onChange={(e) => setBuyerWa(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-soft-grey bg-card px-3 py-2 text-ink"
-              placeholder="0812xxxxxxxx"
+              placeholder="08xxxxxxxxxx"
             />
+            <p className="hint">Untuk konfirmasi pesanan via WhatsApp.</p>
           </div>
         </div>
-      </div>
-
-      <div>
-        <h2 className="font-serif text-xl font-bold text-ink">Pengiriman</h2>
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={() => setFulfillment("PICKUP")}
-            className={`rounded-lg border px-4 py-3 text-sm font-medium transition ${
-              fulfillment === "PICKUP"
-                ? "border-tomato bg-tomato text-white"
-                : "border-soft-grey bg-card text-ink"
-            }`}
-          >
-            Ambil Sendiri
-          </button>
-          <button
-            type="button"
-            onClick={() => setFulfillment("DELIVERY")}
-            className={`rounded-lg border px-4 py-3 text-sm font-medium transition ${
-              fulfillment === "DELIVERY"
-                ? "border-tomato bg-tomato text-white"
-                : "border-soft-grey bg-card text-ink"
-            }`}
-          >
-            Antar
-          </button>
-        </div>
-        {fulfillment === "DELIVERY" && (
-          <div className="mt-3">
-            <label htmlFor="addr" className="block text-sm font-medium text-ink">
-              Alamat Pengiriman
-            </label>
-            <textarea
-              id="addr"
-              required
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-soft-grey bg-card px-3 py-2 text-ink"
-              rows={3}
-              placeholder="Alamat lengkap"
-            />
-          </div>
-        )}
       </div>
 
       {error && (
@@ -133,21 +131,12 @@ export function CheckoutForm({
         </div>
       )}
 
-      <div className="rounded-xl border border-soft-grey bg-card p-4">
-        <div className="flex items-baseline justify-between pb-2">
-          <span className="font-serif text-lg font-bold text-ink">Total</span>
-          <span className="font-serif text-2xl font-bold text-tomato">
-            {formatCurrency(total)}
-          </span>
-        </div>
-      </div>
-
       <button
         type="submit"
         disabled={isPending}
-        className="w-full rounded-lg bg-tomato px-4 py-3 font-semibold text-white transition hover:bg-tomato/90 disabled:opacity-50"
+        className="rr-btn-primary w-full justify-center lg:hidden"
       >
-        {isPending ? "Memproses" : "Konfirmasi Pesanan"}
+        {isPending ? "Memproses" : "Buat Pesanan"}
       </button>
     </form>
   );

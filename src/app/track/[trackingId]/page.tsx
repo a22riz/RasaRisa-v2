@@ -1,15 +1,30 @@
 import Link from "next/link";
 import { getOrderByTracking } from "@/server/orders";
-import { formatCurrency, formatDateTime, formatDate } from "@/lib/format";
+import { formatCurrency, formatDateTime, formatPoLabel } from "@/lib/format";
 import { STATUS_LABELS, type OrderStatus } from "@/lib/constants";
+import { Logo } from "@/components/logo";
+import { ReceiptUpload } from "@/components/buyer/receipt-upload";
 
-const TIMELINE_ORDER: OrderStatus[] = [
-  "WAITING_PAYMENT",
-  "PAYMENT_CONFIRMED",
-  "PROCESSING",
-  "READY_FOR_DELIVERY",
-  "COMPLETED",
+const TIMELINE: { status: OrderStatus; label: string; step: number }[] = [
+  { status: "WAITING_PAYMENT", label: "Pesanan Dibuat", step: 1 },
+  { status: "WAITING_PAYMENT", label: "Menunggu Pembayaran", step: 2 },
+  { status: "PAYMENT_CONFIRMED", label: "Pembayaran Dikonfirmasi", step: 3 },
+  { status: "PROCESSING", label: "Diproses", step: 4 },
+  { status: "READY_FOR_DELIVERY", label: "Siap Dikirim", step: 5 },
+  { status: "COMPLETED", label: "Selesai", step: 6 },
 ];
+
+function statusToStep(status: OrderStatus): number {
+  const map: Record<OrderStatus, number> = {
+    WAITING_PAYMENT: 1,
+    PAYMENT_CONFIRMED: 2,
+    PROCESSING: 3,
+    READY_FOR_DELIVERY: 4,
+    COMPLETED: 5,
+    EXPIRED: -1,
+  };
+  return map[status];
+}
 
 export default async function TrackingPage({
   params,
@@ -21,15 +36,21 @@ export default async function TrackingPage({
 
   if (!order) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-4">
-        <div className="rounded-xl border border-soft-grey bg-card p-8 text-center">
-          <h1 className="font-serif text-xl font-bold text-ink">
+      <div className="min-h-screen">
+        <header className="rr-topbar rr-topbar-centered">
+          <Link href="/" className="rr-logo">
+            <Logo />
+          </Link>
+        </header>
+        <div className="text-center px-6 py-15">
+          <div className="text-5xl mb-4 opacity-40">🔗</div>
+          <h1 className="font-serif text-2xl mb-2.5 text-ink-muted">
             Link tidak valid atau sudah kedaluwarsa
           </h1>
-          <Link
-            href="/"
-            className="mt-4 inline-block rounded-lg bg-tomato px-4 py-2 text-sm font-semibold text-white"
-          >
+          <p className="text-ink-muted mb-6">
+            Cek lagi link kamu, atau hubungi kami kalau butuh bantuan.
+          </p>
+          <Link href="/" className="inline-block bg-ink text-white px-6 py-3 rounded-[10px] font-semibold text-sm">
             Ke Beranda
           </Link>
         </div>
@@ -38,122 +59,201 @@ export default async function TrackingPage({
   }
 
   const isExpired = order.status === "EXPIRED";
-  const currentStep = TIMELINE_ORDER.indexOf(order.status);
+  const currentStep = statusToStep(order.status as OrderStatus);
+  const statusClass =
+    order.status === "COMPLETED" ? "rr-status-confirmed" : "rr-status-waiting";
+
+  // Group items by ready date
+  const groups = new Map<string, typeof order.items>();
+  for (const item of order.items) {
+    const label = formatPoLabel(item.poBatch.readyDate).replace("PO ", "");
+    const group = groups.get(label) ?? [];
+    group.push(item);
+    groups.set(label, group);
+  }
+
+  // Get timeline history
+  const historyMap = new Map<OrderStatus, string>();
+  for (const h of order.statusHistory) {
+    historyMap.set(h.status as OrderStatus, formatDateTime(h.createdAt));
+  }
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-10 border-b border-soft-grey bg-cream/95 backdrop-blur">
-        <div className="mx-auto max-w-2xl px-4 py-3">
-          <Link href="/" className="font-serif text-xl font-bold text-tomato">
-            RasaRisa
-          </Link>
-        </div>
+      <header className="rr-topbar rr-topbar-centered">
+        <Link href="/" className="rr-logo">
+          <Logo />
+        </Link>
       </header>
 
-      <main className="mx-auto max-w-2xl px-4 py-8">
-        <div className="mb-6 text-center">
-          <h1 className="font-serif text-2xl font-bold text-ink">
-            Lacak Pesanan
-          </h1>
-          <p className="mt-1 text-sm text-ink-muted">{order.orderNumber}</p>
+      <div className="max-w-[680px] mx-auto px-6 py-9 pb-14">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <p className="text-[13px] font-semibold text-ink-muted uppercase tracking-wide mb-1.5">
+            Pesanan {order.orderNumber}
+          </p>
+          <h1 className="font-serif font-bold text-3xl mb-2.5">Lacak Pesananmu</h1>
+          {isExpired ? (
+            <div className="rr-status-badge rr-status-expired">
+              <span className="dot" /> {STATUS_LABELS.EXPIRED}
+            </div>
+          ) : (
+            <div className={`rr-status-badge ${statusClass}`}>
+              <span className="dot" /> {STATUS_LABELS[order.status as OrderStatus]}
+            </div>
+          )}
         </div>
 
-        {isExpired ? (
-          <div className="rounded-xl border border-danger bg-danger/10 p-6 text-center">
-            <p className="font-serif text-lg font-bold text-danger">
-              Pesanan Kedaluwarsa
-            </p>
-            <p className="mt-1 text-sm text-ink-muted">
-              Bukti transfer tidak diunggah dalam batas waktu.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {TIMELINE_ORDER.map((status, idx) => {
-              const done = idx <= currentStep && currentStep >= 0;
-              const isCurrent = idx === currentStep;
-              return (
-                <div
-                  key={status}
-                  className={`flex items-center gap-3 rounded-lg border p-3 ${
-                    isCurrent
-                      ? "border-tomato bg-tomato/5"
-                      : done
-                        ? "border-leaf bg-leaf/5"
-                        : "border-soft-grey bg-card"
-                  }`}
-                >
+        {/* Timeline */}
+        <div className="rr-card" style={{ borderRadius: 16, padding: "32px 28px", marginBottom: 24 }}>
+          <h2 className="font-serif text-lg font-semibold mb-6 text-ink-muted">Progress pesanan</h2>
+
+          {TIMELINE.map((tl, idx) => {
+            const isDone = idx < currentStep;
+            const isCurrent = idx === currentStep;
+            const isPending = !isDone && !isCurrent;
+            const time = historyMap.get(tl.status);
+
+            return (
+              <div
+                key={idx}
+                className="grid relative pb-7 last:pb-0"
+                style={{ gridTemplateColumns: "36px 1fr", gap: 16 }}
+              >
+                {/* Connecting line */}
+                {idx < TIMELINE.length - 1 && (
                   <div
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-                      done
-                        ? "bg-leaf text-white"
-                        : isCurrent
-                          ? "bg-tomato text-white"
-                          : "bg-soft-grey text-ink-muted"
-                    }`}
+                    className="absolute"
+                    style={{
+                      left: 17,
+                      top: 36,
+                      bottom: 0,
+                      width: 2,
+                      background: "var(--color-soft-grey)",
+                    }}
+                  />
+                )}
+
+                {/* Dot */}
+                <div
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold relative z-10"
+                  style={{
+                    background: isDone
+                      ? "var(--color-leaf)"
+                      : isCurrent
+                        ? "var(--color-turmeric)"
+                        : "var(--color-cream)",
+                    border: `2px solid ${
+                      isDone ? "var(--color-leaf)" : isCurrent ? "var(--color-turmeric)" : "var(--color-soft-grey)"
+                    }`,
+                    color: isDone || isCurrent ? "white" : "var(--color-ink-muted)",
+                    boxShadow: isCurrent ? "0 0 0 6px rgba(244,162,97,0.18)" : undefined,
+                    animation: isCurrent ? "ring 2s infinite" : undefined,
+                  }}
+                >
+                  {isDone ? "✓" : tl.step}
+                </div>
+
+                {/* Content */}
+                <div>
+                  <h3
+                    className="text-[15px] font-semibold mb-0.5"
+                    style={{
+                      color: isPending ? "var(--color-ink-muted)" : "var(--color-ink)",
+                    }}
                   >
-                    {done && !isCurrent ? "OK" : idx + 1}
-                  </div>
-                  <span
-                    className={`text-sm font-medium ${
-                      done || isCurrent ? "text-ink" : "text-ink-muted"
-                    }`}
-                  >
-                    {STATUS_LABELS[status]}
+                    {tl.label}
+                  </h3>
+                  {isDone && time && (
+                    <p className="text-xs text-leaf font-medium">{time}</p>
+                  )}
+                  {isCurrent && !isExpired && (
+                    <>
+                      <p className="text-xs text-turmeric font-semibold">
+                        {order.receiptImage
+                          ? "Sedang diverifikasi admin"
+                          : "Sedang menunggu bukti transfer"}
+                      </p>
+                      <div
+                        className="text-[13px] text-ink-muted mt-1.5 px-3.5 py-2.5 rounded-lg"
+                        style={{
+                          background: "var(--color-cream)",
+                          borderLeft: "3px solid var(--color-turmeric)",
+                        }}
+                      >
+                        ⏰ Unggah bukti transfer sebelum{" "}
+                        <strong>{formatDateTime(order.expiresAt)}</strong>. Kalau lewat,
+                        pesanan otomatis dibatalkan.
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Order summary (no personal data) */}
+        <div className="rr-card" style={{ borderRadius: 16 }}>
+          <h2 className="font-serif text-lg font-semibold mb-4">Detail pesanan</h2>
+
+          {[...groups.entries()].map(([label, items]) => (
+            <div key={label} className="mb-4 last:mb-0">
+              <div className="rr-ready-group-head">
+                <span className="dot" /> Ready {label}
+              </div>
+              {items.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex justify-between text-sm py-1.5 text-ink-muted"
+                >
+                  <span>{item.product.name} ×{item.quantity}</span>
+                  <span className="text-ink font-medium">
+                    {formatCurrency(item.price * item.quantity)}
                   </span>
                 </div>
-              );
-            })}
-          </div>
-        )}
+              ))}
+            </div>
+          ))}
 
-        <div className="mt-6 rounded-xl border border-soft-grey bg-card p-4">
-          <h2 className="font-serif text-lg font-bold text-ink">Item Pesanan</h2>
-          <div className="mt-3 space-y-2">
-            {order.items.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-baseline justify-between border-b border-soft-grey pb-2 last:border-0"
-              >
-                <div>
-                  <p className="font-medium text-ink">{item.product.name}</p>
-                  <p className="text-xs text-ink-muted">{item.quantity}x</p>
-                </div>
-                <p className="font-medium text-ink">
-                  {formatCurrency(item.price * item.quantity)}
-                </p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-3 flex items-baseline justify-between">
-            <span className="font-serif text-lg font-bold text-ink">Total</span>
-            <span className="font-serif text-xl font-bold text-tomato">
-              {formatCurrency(order.totalAmount)}
+          <div className="mt-4 pt-4 border-t border-soft-grey flex items-center gap-2.5 text-sm">
+            <span className="text-lg">
+              {order.fulfillment === "DELIVERY" ? "🛵" : "🏪"}
+            </span>
+            <span>
+              {order.fulfillment === "DELIVERY" ? "Antar ke rumah · Gratis" : "Ambil sendiri"}
             </span>
           </div>
+
+          {/* Upload CTA */}
+          {order.status === "WAITING_PAYMENT" && !order.receiptImage && (
+            <div
+              className="mt-5 rounded-xl p-5 text-center"
+              style={{
+                background: "linear-gradient(135deg, rgba(230,57,70,0.06), rgba(244,162,97,0.06))",
+                border: "1px dashed var(--color-turmeric)",
+              }}
+            >
+              <h3 className="font-serif text-base mb-1.5">Unggah bukti transfer</h3>
+              <p className="text-[13px] text-ink-muted mb-3.5">
+                Belum unggah bukti? Transfer dulu, lalu unggah di sini.
+              </p>
+              <ReceiptUpload orderId={order.id} />
+            </div>
+          )}
+
+          {order.receiptImage && order.status === "WAITING_PAYMENT" && (
+            <div
+              className="mt-5 rounded-xl p-4 text-center"
+              style={{ background: "rgba(56,142,60,0.06)", border: "1px solid rgba(56,142,60,0.2)" }}
+            >
+              <p className="text-sm font-semibold text-leaf">
+                Bukti transfer sudah diunggah. Menunggu konfirmasi admin.
+              </p>
+            </div>
+          )}
         </div>
-
-        {order.fulfillment === "DELIVERY" && (
-          <div className="mt-4 rounded-xl border border-soft-grey bg-card p-4">
-            <p className="text-sm text-ink-muted">
-              Pesanan akan diantar sesuai jadwal.
-            </p>
-          </div>
-        )}
-
-        {order.status === "READY_FOR_DELIVERY" && (
-          <div className="mt-4 rounded-xl border border-leaf bg-leaf/10 p-4">
-            <p className="font-serif text-lg font-bold text-leaf">
-              Siap diambil!
-            </p>
-            <p className="mt-1 text-sm text-ink">
-              {order.fulfillment === "PICKUP"
-                ? `Ambil pesanan kamu pada ${formatDate(order.items[0]?.poBatch?.readyDate ?? order.createdAt)}`
-                : "Pesanan akan segera diantar."}
-            </p>
-          </div>
-        )}
-      </main>
+      </div>
     </div>
   );
 }
