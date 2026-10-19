@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDateTime, formatPoLabel } from "@/lib/format";
 import { STATUS_LABELS, type OrderStatus } from "@/lib/constants";
 import { ReceiptUpload } from "@/components/buyer/receipt-upload";
+import { CopyButton } from "@/components/buyer/copy-button";
 import { Logo } from "@/components/logo";
 
 const FOOD_EMOJIS = ["🍲", "🍗", "🐟", "🥤"];
@@ -85,13 +86,7 @@ export default async function OrderConfirmationPage({
             <p className="font-serif text-3xl font-bold tracking-wide mb-1.5">{bankNum}</p>
             <p className="text-sm text-ink-muted">{bankHolder}</p>
 
-            <button
-              type="button"
-              className="mt-3.5 rr-btn-ghost text-[13px]"
-              onClick={() => navigator.clipboard?.writeText(bankNum)}
-            >
-              📋 Salin nomor rekening
-            </button>
+            <CopyButton value={bankNum} />
 
             <div className="mt-4 pt-4 border-t border-soft-grey flex justify-between items-center">
               <span className="text-sm text-ink-muted">Jumlah yang harus ditransfer</span>

@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { createProduct, updateProduct } from "@/app/actions/admin/product";
-import { formatCurrency } from "@/lib/format";
 
 export default async function ProductFormPage({
   params,
@@ -21,21 +20,21 @@ export default async function ProductFormPage({
     : createProduct;
 
   return (
-    <div>
-      <Link
-        href="/admin/products"
-        className="mb-4 inline-block text-sm font-medium text-tomato"
-      >
-        Kembali ke Produk
+    <div className="max-w-xl">
+      <Link href="/admin/products" className="rr-action-btn mb-4 inline-flex">
+        ← Kembali ke Produk
       </Link>
-      <h1 className="font-serif text-2xl font-bold text-ink">
+      <h1 className="font-serif text-3xl font-bold mb-1">
         {product ? "Edit Produk" : "Tambah Produk"}
       </h1>
+      <p className="text-ink-muted text-sm mb-6">
+        {product ? "Ubah detail produk." : "Tambahkan item baru ke katalog menu."}
+      </p>
 
-      <form action={action} className="mt-6 max-w-lg space-y-4">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-ink">
-            Nama Item
+      <form action={action} className="rr-card" style={{ marginBottom: 0 }}>
+        <div className="rr-field">
+          <label htmlFor="name">
+            Nama Item <span className="req">*</span>
           </label>
           <input
             id="name"
@@ -43,12 +42,13 @@ export default async function ProductFormPage({
             type="text"
             required
             defaultValue={product?.name ?? ""}
-            className="mt-1 w-full rounded-lg border border-soft-grey bg-card px-3 py-2 text-ink"
+            placeholder="Contoh: Rendang Daging Sapi"
           />
         </div>
-        <div>
-          <label htmlFor="price" className="block text-sm font-medium text-ink">
-            Harga (Rp)
+
+        <div className="rr-field">
+          <label htmlFor="price">
+            Harga (Rp) <span className="req">*</span>
           </label>
           <input
             id="price"
@@ -57,22 +57,22 @@ export default async function ProductFormPage({
             required
             min="1"
             defaultValue={product?.price ?? ""}
-            className="mt-1 w-full rounded-lg border border-soft-grey bg-card px-3 py-2 text-ink"
+            placeholder="50000"
           />
         </div>
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium text-ink">
-            Deskripsi (opsional)
-          </label>
+
+        <div className="rr-field">
+          <label htmlFor="description">Deskripsi (opsional)</label>
           <textarea
             id="description"
             name="description"
             rows={3}
             defaultValue={product?.description ?? ""}
-            className="mt-1 w-full rounded-lg border border-soft-grey bg-card px-3 py-2 text-ink"
+            placeholder="Deskripsi singkat tentang menu ini"
           />
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-2 mb-5">
           <input
             id="isActive"
             name="isActive"
@@ -81,22 +81,15 @@ export default async function ProductFormPage({
             className="h-4 w-4 rounded border-soft-grey"
           />
           <label htmlFor="isActive" className="text-sm font-medium text-ink">
-            Produk aktif
+            Produk aktif (tampil di katalog pembeli)
           </label>
         </div>
+
         <div className="flex gap-3">
-          <button
-            type="submit"
-            className="rounded-lg bg-tomato px-4 py-2.5 font-semibold text-white transition hover:bg-tomato/90"
-          >
-            Simpan
+          <button type="submit" className="rr-btn-primary flex-1 justify-center">
+            {product ? "Simpan Perubahan" : "Tambah Produk"}
           </button>
-          <Link
-            href="/admin/products"
-            className="rounded-lg border border-soft-grey bg-card px-4 py-2.5 text-sm font-medium text-ink transition hover:border-turmeric"
-          >
-            Batal
-          </Link>
+          <Link href="/admin/products" className="rr-btn-ghost">Batal</Link>
         </div>
       </form>
     </div>

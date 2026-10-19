@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { adminLogout } from "@/app/actions/admin/auth";
+import { prisma } from "@/lib/prisma";
 import { Logo } from "@/components/logo";
 
 const navSections = [
@@ -9,7 +10,7 @@ const navSections = [
     section: "Utama",
     items: [
       { href: "/admin", label: "Dashboard", icon: "📊" },
-      { href: "/admin/orders", label: "Pesanan", icon: "📦" },
+      { href: "/admin/orders", label: "Pesanan", icon: "📦", badge: true },
       { href: "/admin/products", label: "Katalog Menu", icon: "🍽️" },
       { href: "/admin/po", label: "Kelola PO", icon: "📅" },
     ],
@@ -32,12 +33,13 @@ export default async function AdminLayout({
     redirect("/admin/login");
   }
 
-  const currentPath = "/admin"; // Static for now; active state via URL matching in client
+  const verifyCount = await prisma.order.count({
+    where: { status: "WAITING_PAYMENT", receiptImage: { not: null } },
+  });
 
   return (
-    <div className="grid min-h-screen" style={{ gridTemplateColumns: "240px 1fr" }}>
-      {/* Sidebar */}
-      <aside className="rr-sidebar hidden lg:block">
+    <div className="rr-admin-layout">
+      <aside className="rr-sidebar">
         <div className="rr-sidebar-logo">
           <Logo variant="light" />
         </div>
@@ -52,39 +54,23 @@ export default async function AdminLayout({
               >
                 <span className="icon">{item.icon}</span>
                 {item.label}
+                {item.badge && verifyCount > 0 && (
+                  <span className="rr-nav-badge">{verifyCount}</span>
+                )}
               </Link>
             ))}
           </div>
         ))}
         <div className="rr-nav-section">Akun</div>
         <form action={adminLogout}>
-          <button type="submit" className="rr-nav-item" style={{ background: "none", border: "none", width: "100%", textAlign: "left" }}>
+          <button type="submit" className="rr-nav-item rr-nav-logout">
             <span className="icon">🚪</span>
             Keluar
           </button>
         </form>
       </aside>
 
-      {/* Mobile sidebar (horizontal scroll) */}
-      <aside className="lg:hidden rr-sidebar" style={{ position: "static", height: "auto", display: "flex", overflowX: "auto", padding: "12px", gap: 4 }}>
-        <Link href="/admin" className="rr-nav-item active" style={{ borderLeft: "none", borderBottom: "3px solid var(--color-tomato)", whiteSpace: "nowrap" }}>
-          📊 Dashboard
-        </Link>
-        <Link href="/admin/orders" className="rr-nav-item" style={{ borderLeft: "none", whiteSpace: "nowrap" }}>
-          📦 Pesanan
-        </Link>
-        <Link href="/admin/products" className="rr-nav-item" style={{ borderLeft: "none", whiteSpace: "nowrap" }}>
-          🍽️ Menu
-        </Link>
-        <Link href="/admin/po" className="rr-nav-item" style={{ borderLeft: "none", whiteSpace: "nowrap" }}>
-          📅 PO
-        </Link>
-        <Link href="/admin/reports" className="rr-nav-item" style={{ borderLeft: "none", whiteSpace: "nowrap" }}>
-          💰 Laporan
-        </Link>
-      </aside>
-
-      <main className="bg-cream overflow-y-auto" style={{ padding: "28px 32px" }}>
+      <main className="rr-admin-main">
         {children}
       </main>
     </div>

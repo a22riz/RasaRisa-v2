@@ -60,9 +60,10 @@ export function OrderActions({
           type="button"
           onClick={handleAdvance}
           disabled={isPending}
-          className="w-full rounded-lg bg-tomato px-4 py-2.5 font-semibold text-white transition hover:bg-tomato/90 disabled:opacity-50"
+          className="rr-btn-primary w-full justify-center"
+          style={{ borderRadius: 10, padding: 13, fontSize: 15, fontWeight: 700 }}
         >
-          {isPending ? "Memproses" : `Lanjut ke: ${STATUS_LABELS[next]}`}
+          {isPending ? "Memproses..." : `Lanjut ke: ${STATUS_LABELS[next]}`}
         </button>
       )}
 
@@ -71,7 +72,7 @@ export function OrderActions({
           type="button"
           onClick={handleReupload}
           disabled={isPending}
-          className="w-full rounded-lg border border-soft-grey bg-card px-4 py-2.5 text-sm font-medium text-ink transition hover:border-turmeric disabled:opacity-50"
+          className="rr-btn-ghost w-full justify-center"
         >
           Minta Unggah Ulang Bukti
         </button>
@@ -80,6 +81,12 @@ export function OrderActions({
       {currentStatus === "WAITING_PAYMENT" && !hasReceipt && (
         <div className="rounded-lg border border-turmeric bg-turmeric/10 p-3 text-sm text-ink">
           {ERRORS.NO_RECEIPT}
+        </div>
+      )}
+
+      {isTerminal && (
+        <div className="rounded-lg border border-soft-grey bg-cream p-3 text-sm text-ink-muted text-center">
+          Status akhir. Tidak ada aksi lagi.
         </div>
       )}
 

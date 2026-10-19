@@ -21,29 +21,23 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-ink">
-          Email
-        </label>
+      <div className="rr-field" style={{ marginBottom: 0 }}>
+        <label htmlFor="email">Email</label>
         <input
           id="email"
           name="email"
           type="email"
           required
-          className="mt-1 w-full rounded-lg border border-soft-grey bg-card px-3 py-2 text-ink"
           placeholder="admin@rasarisa.id"
         />
       </div>
-      <div>
-        <label htmlFor="password" className="block text-sm font-medium text-ink">
-          Password
-        </label>
+      <div className="rr-field" style={{ marginBottom: 0 }}>
+        <label htmlFor="password">Password</label>
         <input
           id="password"
           name="password"
           type="password"
           required
-          className="mt-1 w-full rounded-lg border border-soft-grey bg-card px-3 py-2 text-ink"
         />
       </div>
       {error && (
@@ -54,9 +48,10 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="w-full rounded-lg bg-tomato px-4 py-3 font-semibold text-white transition hover:bg-tomato/90 disabled:opacity-50"
+        className="rr-btn-primary w-full justify-center"
+        style={{ borderRadius: 10, padding: 13, fontSize: 15, fontWeight: 700 }}
       >
-        {isPending ? "Masuk" : "Masuk"}
+        {isPending ? "Memproses..." : "Masuk"}
       </button>
     </form>
   );
