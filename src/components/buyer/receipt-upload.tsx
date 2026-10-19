@@ -12,12 +12,13 @@ export function ReceiptUpload({ orderId }: { orderId: string }) {
     e.preventDefault();
     setMessage(null);
     setError(null);
-    const formData = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
     startTransition(async () => {
       const result = await uploadReceipt(orderId, formData);
       if (result.ok) {
         setMessage(result.message ?? "Bukti transfer berhasil diunggah");
-        e.currentTarget.reset();
+        form.reset();
       } else {
         setError(result.error ?? "Gagal mengunggah");
       }
@@ -50,7 +51,7 @@ export function ReceiptUpload({ orderId }: { orderId: string }) {
         accept="image/jpeg,image/png"
         required
         className="hidden"
-        onChange={(e) => e.currentTarget.form?.requestSubmit()}
+        onChange={(e) => { const f = e.currentTarget.form; f?.requestSubmit(); }}
       />
       {message && (
         <p className="rounded-lg border border-leaf bg-leaf/10 p-3 text-sm text-leaf">{message}</p>
