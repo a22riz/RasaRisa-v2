@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDateTime, formatPoLabel } from "@/lib/format";
-import { STATUS_LABELS, FULFILLMENT_LABELS, type OrderStatus } from "@/lib/constants";
+import { STATUS_LABELS, FULFILLMENT_LABELS, FULFILLMENT_GROUP_LABELS, type OrderStatus, type FulfillmentGroupStatus } from "@/lib/constants";
 import { OrderActions } from "@/components/admin/order-actions";
 
 const STATUS_BADGE_CLASS: Record<OrderStatus, string> = {
@@ -40,6 +40,7 @@ export default async function AdminOrderDetailPage({
     include: {
       items: { include: { product: true, poBatch: true } },
       statusHistory: { orderBy: { createdAt: "asc" } },
+      fulfillmentGroups: { include: { poBatch: true } },
     },
   });
 
@@ -56,6 +57,22 @@ export default async function AdminOrderDetailPage({
     group.push(item);
     groups.set(label, group);
   }
+
+  // Group status by ready-date label (for inline display + actions)
+  const groupStatusByLabel = new Map<string, string>();
+  for (const fg of order.fulfillmentGroups) {
+    const label = formatPoLabel(fg.poBatch.readyDate).replace("PO ", "");
+    groupStatusByLabel.set(label, fg.status);
+  }
+
+  // Group info for OrderActions
+  const actionGroups = order.fulfillmentGroups
+    .map((fg) => ({
+      poBatchId: fg.poBatchId,
+      label: formatPoLabel(fg.poBatch.readyDate),
+      status: fg.status as FulfillmentGroupStatus,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
 
   const historyMap = new Map<OrderStatus, string>();
   for (const h of order.statusHistory) {
@@ -139,6 +156,25 @@ export default async function AdminOrderDetailPage({
                 <div key={label} className={groupIdx > 0 ? "mt-4 pt-4 border-t border-soft-grey" : ""}>
                   <div className="rr-ready-group-head">
                     <span className="dot" /> Ready {label}
+                    {groupStatusByLabel.has(label) && (
+                      <span
+                        className="ml-auto text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
+                        style={{
+                          background: groupStatusByLabel.get(label) === "COMPLETED"
+                            ? "rgba(56,142,60,0.12)"
+                            : groupStatusByLabel.get(label) === "READY_FOR_DELIVERY"
+                              ? "rgba(244,162,97,0.15)"
+                              : "var(--color-cream)",
+                          color: groupStatusByLabel.get(label) === "COMPLETED"
+                            ? "var(--color-leaf)"
+                            : groupStatusByLabel.get(label) === "READY_FOR_DELIVERY"
+                              ? "var(--color-turmeric)"
+                              : "var(--color-ink-muted)",
+                        }}
+                      >
+                        {FULFILLMENT_GROUP_LABELS[groupStatusByLabel.get(label) as FulfillmentGroupStatus]}
+                      </span>
+                    )}
                   </div>
                   {items.map((item, idx) => {
                     const emoji = FOOD_EMOJIS[idx % FOOD_EMOJIS.length];
@@ -240,6 +276,7 @@ export default async function AdminOrderDetailPage({
               orderId={order.id}
               currentStatus={order.status as OrderStatus}
               hasReceipt={!!order.receiptImage}
+              groups={actionGroups}
             />
           </div>
         </div>

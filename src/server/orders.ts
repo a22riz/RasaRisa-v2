@@ -1,5 +1,12 @@
 import { prisma } from "@/lib/prisma";
-import { ORDER_EXPIRY_HOURS, TRACKING_EXPIRY_DAYS } from "@/lib/constants";
+import { ORDER_EXPIRY_HOURS, TRACKING_EXPIRY_DAYS, ERRORS, FULFILLMENT_GROUP_LABELS, type OrderStatus, type FulfillmentGroupStatus } from "@/lib/constants";
+import {
+  validateTransition,
+  nextGroupStatus,
+  validateGroupTransition,
+  deriveOrderStatusFromGroups,
+} from "@/lib/status-machine";
+import { formatPoLabel } from "@/lib/format";
 import type { Cart } from "@/lib/validation";
 
 export async function getCatalog() {
@@ -105,6 +112,7 @@ export async function getOrderByTracking(trackingId: string) {
     include: {
       items: { include: { product: true, poBatch: true } },
       statusHistory: { orderBy: { createdAt: "asc" } },
+      fulfillmentGroups: { include: { poBatch: true } },
     },
   });
 
@@ -140,6 +148,7 @@ export async function getOrderById(id: string) {
     include: {
       items: { include: { product: true, poBatch: true } },
       statusHistory: { orderBy: { createdAt: "asc" } },
+      fulfillmentGroups: { include: { poBatch: true } },
     },
   });
 }
@@ -152,6 +161,93 @@ export async function attachReceipt(orderId: string, filename: string) {
       receiptUploadedAt: new Date(),
     },
   });
+}
+
+// Confirm payment: WAITING_PAYMENT -> PAYMENT_CONFIRMED + create one
+// FulfillmentGroup per PoBatch in the order (all start at PROCESSING).
+// Receipt must already be attached.
+export async function confirmPayment(orderId: string) {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { items: true },
+  });
+  if (!order) return { ok: false as const, error: "Pesanan tidak ditemukan" };
+  if (!order.receiptImage) return { ok: false as const, error: ERRORS.NO_RECEIPT };
+
+  const v = validateTransition(order.status as OrderStatus, "PAYMENT_CONFIRMED");
+  if (!v.ok) return { ok: false as const, error: v.error };
+
+  const poBatchIds = [...new Set(order.items.map((i) => i.poBatchId))];
+  await prisma.$transaction([
+    prisma.order.update({
+      where: { id: orderId },
+      data: {
+        status: "PAYMENT_CONFIRMED",
+        paymentConfirmedAt: new Date(),
+        fulfillmentGroups: {
+          create: poBatchIds.map((poBatchId) => ({ poBatchId })),
+        },
+      },
+    }),
+    prisma.statusHistory.create({
+      data: { orderId, status: "PAYMENT_CONFIRMED", note: "Pembayaran dikonfirmasi admin" },
+    }),
+  ]);
+
+  return { ok: true as const };
+}
+
+// Advance a single fulfillment group to its next status and re-derive the
+// order status (least-advanced group wins). Logs a history entry per advance.
+export async function advanceGroup(orderId: string, poBatchId: string) {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { fulfillmentGroups: { include: { poBatch: true } } },
+  });
+  if (!order) return { ok: false as const, error: "Pesanan tidak ditemukan" };
+
+  const orderStatus = order.status as OrderStatus;
+  if (
+    orderStatus !== "PAYMENT_CONFIRMED" &&
+    orderStatus !== "PROCESSING" &&
+    orderStatus !== "READY_FOR_DELIVERY"
+  ) {
+    return { ok: false as const, error: ERRORS.STATUS_BACKWARD };
+  }
+
+  const group = order.fulfillmentGroups.find((g) => g.poBatchId === poBatchId);
+  if (!group) return { ok: false as const, error: "Batch tidak ditemukan" };
+
+  const current = group.status as FulfillmentGroupStatus;
+  const next = nextGroupStatus(current);
+  if (!next) return { ok: false as const, error: ERRORS.STATUS_BACKWARD };
+
+  const v = validateGroupTransition(current, next);
+  if (!v.ok) return { ok: false as const, error: v.error };
+
+  const projected = order.fulfillmentGroups.map((g) =>
+    g.id === group.id
+      ? { status: next }
+      : { status: g.status as FulfillmentGroupStatus },
+  );
+  const derived = deriveOrderStatusFromGroups(projected);
+  const label = formatPoLabel(group.poBatch.readyDate);
+  const note = `Batch ${label}: ${FULFILLMENT_GROUP_LABELS[next]}`;
+
+  await prisma.$transaction(async (tx) => {
+    await tx.fulfillmentGroup.update({
+      where: { id: group.id },
+      data: { status: next },
+    });
+    if (derived && derived !== orderStatus) {
+      await tx.order.update({ where: { id: orderId }, data: { status: derived } });
+      await tx.statusHistory.create({ data: { orderId, status: derived, note } });
+    } else {
+      await tx.statusHistory.create({ data: { orderId, status: orderStatus, note } });
+    }
+  });
+
+  return { ok: true as const, derived };
 }
 
 export async function autoExpireOrders() {

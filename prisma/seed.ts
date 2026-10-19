@@ -71,12 +71,28 @@ async function main() {
         isActive: true,
       },
     }),
+    prisma.product.create({
+      data: {
+        name: "Es Cendol Durian",
+        description: "Cendol segar dengan durian montong, santan kental.",
+        price: 28000,
+        isActive: true,
+      },
+    }),
+    prisma.product.create({
+      data: {
+        name: "Sate Padang",
+        description: "Sate Padang dengan kuah kuning khas, bumbu rempah penuh.",
+        price: 38000,
+        isActive: true,
+      },
+    }),
   ]);
 
-  // Sample PO batch: ready Saturday, close Friday evening
   const now = new Date();
+
+  // Saturday PO batch: ready Saturday 10am, close Friday 6pm
   const saturday = new Date(now);
-  // Find next Saturday (day 6)
   const daysUntilSat = (6 - now.getDay() + 7) % 7 || 7;
   saturday.setDate(now.getDate() + daysUntilSat);
   saturday.setHours(10, 0, 0, 0);
@@ -85,15 +101,34 @@ async function main() {
   friday.setDate(saturday.getDate() - 1);
   friday.setHours(18, 0, 0, 0);
 
-  const poBatch = await prisma.poBatch.create({
+  // Sunday PO batch: ready Sunday 10am, close Saturday 6pm
+  const sunday = new Date(saturday);
+  sunday.setDate(saturday.getDate() + 1);
+  sunday.setHours(10, 0, 0, 0);
+
+  const saturdayClose = new Date(saturday);
+  saturdayClose.setHours(18, 0, 0, 0);
+
+  const [satProducts, sunProducts] = [products.slice(0, 4), products.slice(4)];
+
+  const satBatch = await prisma.poBatch.create({
     data: {
       readyDate: saturday,
       closeDate: friday,
       status: "OPEN",
       poItems: {
-        create: products.map((p) => ({
-          productId: p.id,
-        })),
+        create: satProducts.map((p) => ({ productId: p.id })),
+      },
+    },
+  });
+
+  const sunBatch = await prisma.poBatch.create({
+    data: {
+      readyDate: sunday,
+      closeDate: saturdayClose,
+      status: "OPEN",
+      poItems: {
+        create: sunProducts.map((p) => ({ productId: p.id })),
       },
     },
   });
@@ -101,7 +136,8 @@ async function main() {
   console.log("Seed complete.");
   console.log(`Admin: ${process.env.ADMIN_EMAIL || "admin@rasarisa.id"}`);
   console.log(`Products: ${products.length}`);
-  console.log(`PO Batch: ${poBatch.id} (ready ${saturday.toISOString()})`);
+  console.log(`Sat batch ${satBatch.id} (ready ${saturday.toISOString()})`);
+  console.log(`Sun batch ${sunBatch.id} (ready ${sunday.toISOString()})`);
 }
 
 main()

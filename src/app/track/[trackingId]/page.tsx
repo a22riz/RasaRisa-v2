@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getOrderByTracking } from "@/server/orders";
 import { formatCurrency, formatDateTime, formatPoLabel } from "@/lib/format";
-import { STATUS_LABELS, type OrderStatus } from "@/lib/constants";
+import { STATUS_LABELS, FULFILLMENT_GROUP_LABELS, FULFILLMENT_GROUP_STATUSES, type OrderStatus, type FulfillmentGroupStatus } from "@/lib/constants";
 import { Logo } from "@/components/logo";
 import { ReceiptUpload } from "@/components/buyer/receipt-upload";
 
@@ -209,6 +209,63 @@ export default async function TrackingPage({
             );
           })}
         </div>
+
+        {/* Per-batch fulfillment progress (after payment is confirmed) */}
+        {order.fulfillmentGroups.length > 0 && (
+          <div className="rr-card" style={{ borderRadius: 16, marginBottom: 24 }}>
+            <h2 className="font-serif text-lg font-semibold mb-4">Progress per batch</h2>
+            {[...order.fulfillmentGroups]
+              .sort((a, b) => a.poBatch.readyDate.getTime() - b.poBatch.readyDate.getTime())
+              .map((fg) => {
+                const label = formatPoLabel(fg.poBatch.readyDate).replace("PO ", "");
+                const current = fg.status as FulfillmentGroupStatus;
+                const currentIdx = FULFILLMENT_GROUP_STATUSES.indexOf(current);
+                return (
+                  <div key={fg.id} className="mb-5 last:mb-0">
+                    <div className="rr-ready-group-head" style={{ marginBottom: 12 }}>
+                      <span className="dot" /> Ready {label}
+                    </div>
+                    <div className="flex items-center">
+                      {FULFILLMENT_GROUP_STATUSES.map((st, idx) => {
+                        const isDone = idx < currentIdx;
+                        const isCurrent = idx === currentIdx;
+                        const isLast = idx === FULFILLMENT_GROUP_STATUSES.length - 1;
+                        return (
+                          <div key={st} className="flex items-center flex-1 last:flex-none">
+                            <div className="flex flex-col items-center gap-1">
+                              <div
+                                className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold"
+                                style={{
+                                  background: isDone || isCurrent ? "var(--color-leaf)" : "var(--color-cream)",
+                                  border: `2px solid ${isDone || isCurrent ? "var(--color-leaf)" : "var(--color-soft-grey)"}`,
+                                  color: isDone || isCurrent ? "white" : "var(--color-ink-muted)",
+                                  boxShadow: isCurrent ? "0 0 0 4px rgba(56,142,60,0.15)" : undefined,
+                                }}
+                              >
+                                {isDone ? "✓" : idx + 1}
+                              </div>
+                              <span
+                                className="text-[9px] font-medium text-center max-w-[70px] leading-tight"
+                                style={{ color: isDone || isCurrent ? "var(--color-ink)" : "var(--color-ink-muted)" }}
+                              >
+                                {FULFILLMENT_GROUP_LABELS[st]}
+                              </span>
+                            </div>
+                            {!isLast && (
+                              <div
+                                className="h-0.5 flex-1 mx-1 mb-4"
+                                style={{ background: idx < currentIdx ? "var(--color-leaf)" : "var(--color-soft-grey)" }}
+                              />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        )}
 
         {/* Order summary (no personal data) */}
         <div className="rr-card" style={{ borderRadius: 16 }}>

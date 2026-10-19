@@ -152,6 +152,27 @@ No JWT, no OAuth, no 2FA. Simplest secure approach.
 Fraunces + Inter font files in `public/fonts/`. `@font-face` in globals.css. No `<link>` to Google Fonts.
 Reason: zero external runtime calls constraint.
 
+### 8. Multi-PO fulfillment per batch (FulfillmentGroup)
+One order can mix items from several PO batches (different ready dates). After
+payment is confirmed, one `FulfillmentGroup` is created per distinct PoBatch in
+the order. Each group advances independently: PROCESSING → READY_FOR_DELIVERY →
+COMPLETED. The order status is derived as the LEAST-advanced group status, so
+the order only reaches READY when every batch is ready, and COMPLETED only when
+all batches are done. Payment stays shared (one receipt, one verify).
+
+Reason: a multi-batch order's batches finish on different days. A single
+order-level status cannot represent "batch A ready, batch B still cooking".
+Per-group status + derived order status gives an accurate overall picture plus
+per-batch detail on the tracking page.
+
+Admin advances per group (not per order). Order-level transitions are limited to
+payment confirmation (creates groups) and auto-expire. `confirmPayment` and
+`advanceGroup` live in `src/server/orders.ts` as pure functions (no auth/revalidate);
+the server actions in `src/app/actions/admin/order.ts` are thin wrappers
+(requireAdmin + revalidate). This keeps the logic unit/integration-testable.
+ponytail: if batches ever need independent payment too, split payment per group.
+Ceiling: business model change (today all batches share one transfer).
+
 ## Data Flow
 
 ### Buyer checkout flow
@@ -167,8 +188,11 @@ Catalog (read open POs) → Add to cart (cookie) → Checkout (read cart cookie)
 ```
 Admin login → Dashboard (see "Perlu verifikasi" count) → Orders list (filter)
 → Order detail → View receipt image → Click "Konfirmasi Pembayaran"
-→ Status: WAITING_PAYMENT → PAYMENT_CONFIRMED (validated forward-only)
-→ Buyer tracking page updates on next refresh
+→ Status: WAITING_PAYMENT → PAYMENT_CONFIRMED + create FulfillmentGroup
+  per PoBatch (all PROCESSING)
+→ Admin advances each batch independently: PROCESSING → READY → COMPLETED
+→ Order status auto-derives as least-advanced group (COMPLETED when all done)
+→ Buyer tracking page updates on next refresh (per-batch mini-timelines)
 ```
 
 ### Order auto-expire

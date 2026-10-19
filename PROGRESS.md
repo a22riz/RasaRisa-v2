@@ -1,7 +1,7 @@
 # PROGRESS.md — RasaRisa v2 Development
 
 > Last updated: 19 Oct 2026
-> Status: Core implementation complete, ready for Docker deploy + manual testing
+> Status: Multi-PO fulfillment per batch implemented + verified. Core complete, ready for Docker deploy + manual testing
 
 ## Phase 0: Planning ✅ DONE
 
@@ -28,9 +28,9 @@
 
 ## Phase 2: Data Layer ✅ DONE
 
-- [x] Prisma schema (Product, PoBatch, PoItem, Order, OrderItem, StatusHistory, Admin, Setting)
-- [x] Migrations (20261019000000_init)
-- [x] Seed script (admin account + sample products + sample PO)
+- [x] Prisma schema (Product, PoBatch, PoItem, Order, OrderItem, StatusHistory, Admin, Setting, FulfillmentGroup)
+- [x] Migrations (20261019000000_init, 20261019151201_add_fulfillment_groups)
+- [x] Seed script (admin account + sample products + 2 sample PO batches: Saturday + Sunday)
 - [x] Unit tests: status state machine (13 tests), WA validation (14 tests)
 
 ## Phase 3: Admin Auth ✅ DONE
@@ -88,9 +88,11 @@
 ## Phase 9: Buyer — Tracking Page ✅ DONE
 
 - [x] Tracking page (`/track/[trackingId]`)
-- [x] Timeline (5 steps + expired state)
+- [x] Timeline (5 steps + expired state) — overall order progress
+- [x] Per-batch mini-timelines (Diproses → Siap → Selesai) once payment confirmed
 - [x] No personal data exposed
 - [x] Upload prompt when status = WAITING_PAYMENT (via order confirmation page)
+- [x] Re-upload warning banner when admin requested re-upload
 - [x] Invalid/expired link state
 - [x] Lazy auto-expire on tracking page read
 
@@ -99,11 +101,12 @@
 - [x] Orders list (`/admin/orders`) with filters (all, need verification, active)
 - [x] Order detail (`/admin/orders/[id]`)
 - [x] Receipt preview (image served via API route)
-- [x] Confirm payment → PAYMENT_CONFIRMED (disabled if no receipt)
+- [x] Confirm payment → PAYMENT_CONFIRMED + create FulfillmentGroups (one per PoBatch) (disabled if no receipt)
 - [x] Request re-upload → stay WAITING_PAYMENT, clear receipt
-- [x] Status advance button (forward only)
+- [x] Per-batch status advance (forward only) via advanceFulfillmentGroup
+- [x] Inline per-batch status pill on ready-group headers
 - [x] Backward rejected: "Status mundur tidak diizinkan"
-- [x] Unit tests: status transitions (13 tests)
+- [x] Unit tests: status transitions (13 tests) + group machine (13 tests)
 
 ## Phase 11: Admin — Dashboard ✅ DONE
 
@@ -144,18 +147,37 @@
 
 ## Phase 15: Verification
 
-- [x] Test suite: 27/27 pass (status machine + WA validation)
+- [x] Test suite: 45 tests (40 unit/always-run + 5 DB integration, skipped unless RUN_DB_TESTS=1)
+- [x] Integration tests verify multi-PO flow end-to-end (createOrder → confirmPayment → advanceGroup × n → COMPLETED)
 - [x] Type check: clean
-- [x] Build: compiles successfully
+- [x] Dev server compiles all routes (home, tracking, admin login) without errors
+- [ ] Build: production build (run before merge; was passing before multi-PO changes)
 - [ ] Manual click-through every screen (needs running DB)
 - [x] Error messages match AGENTS.md spec (in constants.ts)
 - [x] No external runtime calls (self-hosted fonts, local uploads, no API integrations)
 - [ ] Docker deploy test
 
+## Phase 16: Multi-PO Fulfillment per Batch ✅ DONE
+
+One order can mix items from different PO batches (different ready dates). Each
+batch tracks its own fulfillment progress independently. Payment stays shared
+(one receipt, one verify).
+
+- [x] `FulfillmentGroup` model (`orderId`, `poBatchId`, `status` PROCESSING/READY_FOR_DELIVERY/COMPLETED)
+- [x] Migration `20261019151201_add_fulfillment_groups`
+- [x] Group state machine: `nextGroupStatus`, `validateGroupTransition`, `deriveOrderStatusFromGroups` (least-advanced wins)
+- [x] `confirmPayment` server function: WAITING_PAYMENT → PAYMENT_CONFIRMED + create one group per PoBatch (all PROCESSING)
+- [x] `advanceGroup` server function: advance one group, re-derive order status, log history
+- [x] Order status = least-advanced group (COMPLETED only when ALL groups COMPLETED)
+- [x] Admin order detail: per-batch advance buttons + inline per-batch status pill
+- [x] Tracking page: per-batch mini-timelines (Diproses → Siap → Selesai) below global timeline
+- [x] Payment shared: 1 receipt, 1 verify (does NOT split per group)
+- [x] Unit tests: group machine (13 tests)
+- [x] Integration tests: 5 tests vs live DB (multi-PO derivation, single-PO, terminal reject, no-receipt reject)
+
 ## Blocked
 
 - Docker Desktop not running locally (can't test `docker-compose up`)
-- No running Postgres for manual testing
 
 ## Notes
 
@@ -163,3 +185,4 @@
 - Design doc: `docs/superpowers/specs/2026-10-19-rasarisa-design.md`
 - Architecture: `ARCHITECTURE.md`
 - GitHub: https://github.com/a22riz/RasaRisa-v2
+- DB integration tests: `RUN_DB_TESTS=1 npx vitest run src/server/orders.test.ts` (need dev DB up)

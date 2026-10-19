@@ -29,6 +29,7 @@ model PoBatch {
   status    PoStatus @default(OPEN)
   poItems   PoItem[]
   orderItems OrderItem[]
+  fulfillmentGroups FulfillmentGroup[]
   createdAt DateTime @default(now())
 
   @@index([status])
@@ -70,6 +71,7 @@ model Order {
   updatedAt          DateTime    @updatedAt
   items              OrderItem[]
   statusHistory      StatusHistory[]
+  fulfillmentGroups  FulfillmentGroup[]
 
   @@index([status])
   @@index([createdAt])
@@ -88,6 +90,26 @@ enum OrderStatus {
   READY_FOR_DELIVERY
   COMPLETED
   EXPIRED
+}
+
+enum FulfillmentGroupStatus {
+  PROCESSING
+  READY_FOR_DELIVERY
+  COMPLETED
+}
+
+model FulfillmentGroup {
+  id        String                 @id @default(cuid())
+  orderId   String
+  poBatchId String
+  status    FulfillmentGroupStatus @default(PROCESSING)
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
+  order     Order                  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  poBatch   PoBatch                @relation(fields: [poBatchId], references: [id])
+
+  @@unique([orderId, poBatchId])
+  @@index([orderId])
 }
 
 model OrderItem {
