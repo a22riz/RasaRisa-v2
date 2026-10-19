@@ -78,9 +78,9 @@ export default async function TrackingPage({
     historyMap.set(h.status as OrderStatus, formatDateTime(h.createdAt));
   }
 
-  // Detect if admin requested re-upload (latest WAITING_PAYMENT note)
+  // Detect if admin requested re-upload (specific note from requestReupload action)
   const reuploadRequest = order.statusHistory
-    .filter((h) => h.status === "WAITING_PAYMENT" && h.note)
+    .filter((h) => h.status === "WAITING_PAYMENT" && h.note === "Admin meminta unggah ulang bukti transfer")
     .slice(-1)[0];
   const showReuploadBanner = !!reuploadRequest && !order.receiptImage && !isExpired;
 
