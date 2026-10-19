@@ -77,6 +77,7 @@ export async function requestReupload(orderId: string) {
   revalidatePath("/admin");
   revalidatePath("/admin/orders");
   revalidatePath(`/admin/orders/${orderId}`);
+  revalidatePath("/track", "layout");
 
   return { ok: true };
 }

@@ -40,6 +40,12 @@ export default async function OrderConfirmationPage({
     groups.set(label, group);
   }
 
+  // Detect if admin requested re-upload
+  const reuploadRequest = order.statusHistory
+    .filter((h) => h.status === "WAITING_PAYMENT" && h.note)
+    .slice(-1)[0];
+  const showReuploadBanner = !!reuploadRequest && !order.receiptImage;
+
   return (
     <div className="min-h-screen">
       <header className="rr-topbar">
@@ -124,7 +130,20 @@ export default async function OrderConfirmationPage({
               <Link href={`/order/${order.id}?track=${track}`} className="rr-action-btn">Ganti</Link>
             </div>
           ) : (
-            <ReceiptUpload orderId={order.id} />
+            <div>
+              {showReuploadBanner && (
+                <div
+                  className="flex items-center gap-2.5 p-3.5 rounded-xl mb-3"
+                  style={{ background: "rgba(230,57,70,0.06)", border: "1px solid rgba(230,57,70,0.2)" }}
+                >
+                  <span className="text-lg">⚠️</span>
+                  <p className="text-sm text-tomato font-medium">
+                    Admin meminta unggah ulang bukti transfer. Transfer sesuai total, lalu unggah bukti baru di bawah.
+                  </p>
+                </div>
+              )}
+              <ReceiptUpload orderId={order.id} />
+            </div>
           )}
         </div>
 

@@ -78,6 +78,12 @@ export default async function TrackingPage({
     historyMap.set(h.status as OrderStatus, formatDateTime(h.createdAt));
   }
 
+  // Detect if admin requested re-upload (latest WAITING_PAYMENT note)
+  const reuploadRequest = order.statusHistory
+    .filter((h) => h.status === "WAITING_PAYMENT" && h.note)
+    .slice(-1)[0];
+  const showReuploadBanner = !!reuploadRequest && !order.receiptImage && !isExpired;
+
   return (
     <div className="min-h-screen">
       <header className="rr-topbar rr-topbar-centered">
@@ -172,7 +178,9 @@ export default async function TrackingPage({
                       <p className="text-xs text-turmeric font-semibold">
                         {order.receiptImage
                           ? "Sedang diverifikasi admin"
-                          : "Sedang menunggu bukti transfer"}
+                          : showReuploadBanner
+                            ? "Admin meminta unggah ulang bukti transfer"
+                            : "Sedang menunggu bukti transfer"}
                       </p>
                       <div
                         className="text-[13px] text-ink-muted mt-1.5 px-3.5 py-2.5 rounded-lg"
@@ -234,10 +242,24 @@ export default async function TrackingPage({
                 border: "1px dashed var(--color-turmeric)",
               }}
             >
-              <h3 className="font-serif text-base mb-1.5">Unggah bukti transfer</h3>
-              <p className="text-[13px] text-ink-muted mb-3.5">
-                Belum unggah bukti? Transfer dulu, lalu unggah di sini.
-              </p>
+              {showReuploadBanner ? (
+                <>
+                  <div className="flex items-center justify-center gap-2 mb-1.5">
+                    <span className="text-lg">⚠️</span>
+                    <h3 className="font-serif text-base text-tomato">Unggah ulang bukti transfer</h3>
+                  </div>
+                  <p className="text-[13px] text-ink-muted mb-3.5">
+                    Bukti transfer sebelumnya perlu diunggah ulang. Transfer sesuai total, lalu unggah bukti baru di sini.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h3 className="font-serif text-base mb-1.5">Unggah bukti transfer</h3>
+                  <p className="text-[13px] text-ink-muted mb-3.5">
+                    Belum unggah bukti? Transfer dulu, lalu unggah di sini.
+                  </p>
+                </>
+              )}
               <ReceiptUpload orderId={order.id} />
             </div>
           )}
