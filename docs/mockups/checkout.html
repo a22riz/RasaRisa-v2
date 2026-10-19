@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RasaRisa — Checkout</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --warm-white: #FFF3E0;
+    --card-white: #FFFFFF;
+    --rasa-red: #E63946;
+    --rasa-red-dark: #C92F3C;
+    --risa-orange: #F4A261;
+    --ink-dark: #1D1D1D;
+    --ink-muted: #555555;
+    --soft-grey: #E8E2D5;
+    --fresh-green: #388E3C;
+    --danger: #D32F2F;
+    --pot-brown: #4a2e15;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--warm-white);
+    color: var(--ink-dark);
+    line-height: 1.55;
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(244,162,97,0.06) 0%, transparent 45%),
+      radial-gradient(circle at 85% 60%, rgba(230,57,70,0.04) 0%, transparent 45%);
+  }
+
+  /* Topbar (same as catalog) */
+  .topbar {
+    background: rgba(255,243,224,0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--soft-grey);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .logo-link { display: flex; align-items: center; gap: 4px; text-decoration: none; }
+  .logo-link svg { display: block; height: 36px; width: auto; }
+  .back-btn {
+    background: none; border: none; color: var(--ink-muted);
+    font-family: inherit; font-size: 14px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 0;
+  }
+  .back-btn:hover { color: var(--rasa-red); }
+
+  /* Layout */
+  .checkout-wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 32px 24px 56px;
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .checkout-main h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 700;
+    font-size: 2rem;
+    margin-bottom: 6px;
+  }
+  .checkout-main .lede {
+    color: var(--ink-muted);
+    font-size: 14px;
+    margin-bottom: 28px;
+  }
+
+  /* Step indicator */
+  .steps {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 28px;
+    align-items: center;
+  }
+  .step {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 600;
+    color: var(--ink-muted);
+  }
+  .step .num {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--card-white);
+    border: 1px solid var(--soft-grey);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+  }
+  .step.active { color: var(--ink-dark); }
+  .step.active .num { background: var(--rasa-red); color: white; border-color: var(--rasa-red); }
+  .step.done .num { background: var(--fresh-green); color: white; border-color: var(--fresh-green); }
+  .step-line { flex: 1; height: 1px; background: var(--soft-grey); min-width: 20px; }
+
+  /* Cards */
+  .card {
+    background: var(--card-white);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 20px;
+    border: 1px solid var(--soft-grey);
+  }
+  .card h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card .card-sub {
+    font-size: 13px; color: var(--ink-muted);
+    margin-bottom: 18px;
+  }
+
+  /* Cart items grouped by ready date */
+  .ready-group { margin-bottom: 22px; }
+  .ready-group:last-child { margin-bottom: 0; }
+  .ready-group-head {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 600;
+    color: var(--risa-orange);
+    margin-bottom: 12px;
+  }
+  .ready-group-head .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--risa-orange); }
+
+  .cart-item {
+    display: grid;
+    grid-template-columns: 56px 1fr auto auto;
+    gap: 14px;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--soft-grey);
+  }
+  .cart-item:last-child { border-bottom: none; }
+  .cart-item-img {
+    width: 56px; height: 56px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+  }
+  .cart-item-img.a { background: linear-gradient(135deg, #FFCDD2, #EF9A9A); }
+  .cart-item-img.b { background: linear-gradient(135deg, #FFE0B2, #FFCC80); }
+  .cart-item-img.c { background: linear-gradient(135deg, #C8E6C9, #A5D6A7); }
+  .cart-item-img.d { background: linear-gradient(135deg, #FFF9C4, #FFF176); }
+  .cart-item-info h3 { font-size: 14px; font-weight: 600; }
+  .cart-item-info .item-price { font-size: 12px; color: var(--ink-muted); }
+  .qty {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--warm-white); border: 1px solid var(--soft-grey);
+    border-radius: 999px; padding: 4px 4px;
+  }
+  .qty button {
+    width: 24px; height: 24px; border-radius: 50%;
+    border: none; background: var(--card-white);
+    font-size: 14px; cursor: pointer; color: var(--ink-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-family: inherit;
+  }
+  .qty button:hover { background: var(--rasa-red); color: white; }
+  .qty span { min-width: 16px; text-align: center; font-size: 14px; font-weight: 600; }
+  .cart-item-total { font-weight: 700; font-size: 14px; min-width: 70px; text-align: right; }
+  .remove-btn {
+    background: none; border: none; color: var(--ink-muted);
+    cursor: pointer; font-size: 16px; padding: 4px;
+  }
+  .remove-btn:hover { color: var(--danger); }
+
+  /* Fulfillment toggle */
+  .fulfill-toggle {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    margin-bottom: 18px;
+  }
+  .fulfill-opt {
+    border: 1.5px solid var(--soft-grey);
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    background: var(--card-white);
+    transition: border-color 0.15s, background 0.15s;
+    font-family: inherit;
+    text-align: left;
+  }
+  .fulfill-opt:hover { border-color: var(--rasa-red); }
+  .fulfill-opt.selected {
+    border-color: var(--rasa-red);
+    background: rgba(230,57,70,0.04);
+  }
+  .fulfill-opt .fo-icon { font-size: 1.4rem; margin-bottom: 6px; display: block; }
+  .fulfill-opt .fo-title { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+  .fulfill-opt .fo-desc { font-size: 12px; color: var(--ink-muted); }
+
+  /* Form fields */
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 13px; font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--ink-dark);
+  }
+  .field label .req { color: var(--rasa-red); }
+  .field input, .field textarea, .field select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--soft-grey);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--card-white);
+    color: var(--ink-dark);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    outline: none;
+    border-color: var(--rasa-red);
+    box-shadow: 0 0 0 3px rgba(230,57,70,0.12);
+  }
+  .field .hint { font-size: 12px; color: var(--ink-muted); margin-top: 4px; }
+  .field .err { font-size: 12px; color: var(--danger); margin-top: 4px; display: none; }
+  .field.error input, .field.error textarea { border-color: var(--danger); }
+  .field.error .err { display: block; }
+
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* Summary */
+  .summary {
+    position: sticky;
+    top: 80px;
+  }
+  .summary-card {
+    background: var(--card-white);
+    border-radius: 14px;
+    padding: 24px;
+    border: 1px solid var(--soft-grey);
+  }
+  .summary-card h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  .summary-line {
+    display: flex; justify-content: space-between;
+    font-size: 14px; padding: 7px 0;
+    color: var(--ink-muted);
+  }
+  .summary-line .val { color: var(--ink-dark); font-weight: 500; }
+  .summary-total {
+    display: flex; justify-content: space-between;
+    padding-top: 14px; margin-top: 8px;
+    border-top: 2px solid var(--soft-grey);
+    font-size: 17px; font-weight: 700;
+  }
+  .summary-total .val { color: var(--rasa-red); }
+  .place-order-btn {
+    width: 100%;
+    background: var(--rasa-red);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 18px;
+    transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+  }
+  .place-order-btn:hover {
+    background: var(--rasa-red-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(230,57,70,0.28);
+  }
+  .summary-note {
+    font-size: 12px; color: var(--ink-muted);
+    margin-top: 12px; text-align: center; line-height: 1.5;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .checkout-wrap { grid-template-columns: 1fr; gap: 24px; }
+    .summary { position: static; }
+  }
+  @media (max-width: 768px) {
+    .checkout-wrap { padding: 24px 20px 48px; }
+    .checkout-main h1 { font-size: 1.6rem; }
+    .card { padding: 18px; }
+    .cart-item { grid-template-columns: 48px 1fr auto; }
+    .cart-item .qty { grid-column: 2; margin-top: 6px; }
+    .row-2 { grid-template-columns: 1fr; }
+    .fulfill-toggle { grid-template-columns: 1fr; }
+    .topbar { padding: 10px 16px; }
+  }
+
+  .mockup-label {
+    position: fixed; top: 10px; right: 10px;
+    background: var(--ink-dark); color: white;
+    padding: 5px 14px; border-radius: 999px;
+    font-size: 11px; z-index: 100;
+  }
+</style>
+</head>
+<body>
+<div class="mockup-label">Mockup — Checkout</div>
+
+<div class="topbar">
+  <a class="logo-link" href="#">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100">
+      <rect width="400" height="100" fill="transparent"/>
+      <g transform="translate(10, 10) scale(0.6)">
+        <path d="M 65 45 Q 55 30 70 15" fill="none" stroke="#bda082" stroke-width="4" stroke-linecap="round"/>
+        <path d="M 85 45 Q 95 30 80 15" fill="none" stroke="#bda082" stroke-width="4" stroke-linecap="round"/>
+        <path d="M 30 85 L 20 85 M 120 85 L 130 85" fill="none" stroke="#4a2e15" stroke-width="6" stroke-linecap="round"/>
+        <path d="M 30 80 L 120 80 L 110 115 Q 75 125 40 115 Z" fill="#8a9a5b" stroke="#4a2e15" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M 25 80 Q 75 50 125 80 Z" fill="#d49a5b" stroke="#4a2e15" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M 68 62 L 82 62 L 80 52 L 70 52 Z" fill="#4a2e15"/>
+        <circle cx="75" cy="50" r="6" fill="#4a2e15"/>
+      </g>
+      <text x="110" y="55" font-family="'Fraunces', Georgia, serif" font-size="42" font-weight="bold" fill="#4a2e15">RasaRisa</text>
+      <text x="115" y="80" font-family="'Inter', Arial, sans-serif" font-size="16" fill="#604a36">makan enak, tanpa ribet</text>
+    </svg>
+  </a>
+  <button class="back-btn">← Kembali ke menu</button>
+</div>
+
+<div class="checkout-wrap">
+  <div class="checkout-main">
+    <h1>Checkout</h1>
+    <p class="lede">Periksa pesananmu, isi data pengiriman, lalu buat pesanan.</p>
+
+    <div class="steps">
+      <div class="step done"><span class="num">✓</span> Pilih Menu</div>
+      <div class="step-line"></div>
+      <div class="step active"><span class="num">2</span> Checkout</div>
+      <div class="step-line"></div>
+      <div class="step"><span class="num">3</span> Bayar</div>
+    </div>
+
+    <!-- Cart items grouped by ready date -->
+    <div class="card">
+      <h2>Pesananmu</h2>
+      <p class="card-sub">Item dikelompokkan per tanggal ready. Satu transaksi, bisa beberapa tanggal.</p>
+
+      <div class="ready-group">
+        <div class="ready-group-head"><span class="dot"></span> Ready Sabtu, 18 Okt</div>
+
+        <div class="cart-item">
+          <div class="cart-item-img a">🍲</div>
+          <div class="cart-item-info">
+            <h3>Nasi Liwet Box</h3>
+            <p class="item-price">Rp 35.000</p>
+          </div>
+          <div class="qty"><button>−</button><span>2</span><button>+</button></div>
+          <div>
+            <div class="cart-item-total">Rp 70.000</div>
+            <button class="remove-btn">✕</button>
+          </div>
+        </div>
+
+        <div class="cart-item">
+          <div class="cart-item-img b">🍗</div>
+          <div class="cart-item-info">
+            <h3>Ayam Bakar Sambal Matah</h3>
+            <p class="item-price">Rp 42.000</p>
+          </div>
+          <div class="qty"><button>−</button><span>1</span><button>+</button></div>
+          <div>
+            <div class="cart-item-total">Rp 42.000</div>
+            <button class="remove-btn">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ready-group">
+        <div class="ready-group-head"><span class="dot"></span> Ready Senin, 20 Okt</div>
+
+        <div class="cart-item">
+          <div class="cart-item-img c">🐟</div>
+          <div class="cart-item-info">
+            <h3>Ikan Asam Manis</h3>
+            <p class="item-price">Rp 45.000</p>
+          </div>
+          <div class="qty"><button>−</button><span>1</span><button>+</button></div>
+          <div>
+            <div class="cart-item-total">Rp 45.000</div>
+            <button class="remove-btn">✕</button>
+          </div>
+        </div>
+
+        <div class="cart-item">
+          <div class="cart-item-img d">🥤</div>
+          <div class="cart-item-info">
+            <h3>Es Cendol Durian</h3>
+            <p class="item-price">Rp 25.000</p>
+          </div>
+          <div class="qty"><button>−</button><span>2</span><button>+</button></div>
+          <div>
+            <div class="cart-item-total">Rp 50.000</div>
+            <button class="remove-btn">✕</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fulfillment -->
+    <div class="card">
+      <h2>Pengiriman</h2>
+      <p class="card-sub">Pilih cara kamu mau terima pesanan.</p>
+
+      <div class="fulfill-toggle">
+        <button class="fulfill-opt selected">
+          <span class="fo-icon">🛵</span>
+          <div class="fo-title">Antar ke rumah</div>
+          <div class="fo-desc">Gratis, kami antar sendiri ke alamatmu.</div>
+        </button>
+        <button class="fulfill-opt">
+          <span class="fo-icon">🏪</span>
+          <div class="fo-title">Ambil sendiri</div>
+          <div class="fo-desc">Pickup di lokasi kami sesuai jadwal ready.</div>
+        </button>
+      </div>
+
+      <div class="field">
+        <label>Alamat pengiriman <span class="req">*</span></label>
+        <textarea rows="2" placeholder="Jl. Melati No. 12, Bandung">Jl. Melati No. 12, Bandung</textarea>
+        <p class="hint">Contoh: nama jalan, nomor rumah, RT/RW, kelurahan.</p>
+      </div>
+    </div>
+
+    <!-- Buyer data -->
+    <div class="card">
+      <h2>Data Pemesan</h2>
+      <p class="card-sub">Untuk konfirmasi pesanan dan link tracking.</p>
+
+      <div class="row-2">
+        <div class="field">
+          <label>Nama <span class="req">*</span></label>
+          <input type="text" value="Budi Santoso" placeholder="Nama lengkap">
+        </div>
+        <div class="field">
+          <label>Nomor WhatsApp <span class="req">*</span></label>
+          <input type="tel" value="081234567890" placeholder="08xxxxxxxxxx">
+          <p class="hint">Untuk konfirmasi pesanan via WhatsApp.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary">
+    <div class="summary-card">
+      <h2>Ringkasan Pesanan</h2>
+
+      <div class="summary-line"><span>Subtotal (6 item)</span><span class="val">Rp 207.000</span></div>
+      <div class="summary-line"><span>Ongkos kirim</span><span class="val" style="color:var(--fresh-green)">Gratis</span></div>
+      <div class="summary-line"><span>Biaya layanan</span><span class="val">Rp 0</span></div>
+
+      <div class="summary-total">
+        <span>Total</span>
+        <span class="val">Rp 207.000</span>
+      </div>
+
+      <button class="place-order-btn">Buat Pesanan</button>
+      <p class="summary-note">Dengan buat pesanan, kamu setuju transfer sesuai total di atas. Detail rekening muncul setelah pesanan dibuat.</p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

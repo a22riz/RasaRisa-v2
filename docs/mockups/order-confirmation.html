@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RasaRisa — Konfirmasi Pesanan</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --warm-white: #FFF3E0;
+    --card-white: #FFFFFF;
+    --rasa-red: #E63946;
+    --rasa-red-dark: #C92F3C;
+    --risa-orange: #F4A261;
+    --ink-dark: #1D1D1D;
+    --ink-muted: #555555;
+    --soft-grey: #E8E2D5;
+    --fresh-green: #388E3C;
+    --danger: #D32F2F;
+    --pot-brown: #4a2e15;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--warm-white);
+    color: var(--ink-dark);
+    line-height: 1.55;
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(244,162,97,0.06) 0%, transparent 45%),
+      radial-gradient(circle at 85% 60%, rgba(230,57,70,0.04) 0%, transparent 45%);
+  }
+
+  .topbar {
+    background: rgba(255,243,224,0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--soft-grey);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .logo-link { display: flex; align-items: center; gap: 4px; text-decoration: none; }
+  .logo-link svg { display: block; height: 36px; width: auto; }
+  .icon-btn {
+    background: var(--card-white);
+    border: 1px solid var(--soft-grey);
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--ink-dark);
+    font-family: inherit;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .icon-btn:hover { border-color: var(--rasa-red); transform: translateY(-1px); }
+
+  /* Success banner */
+  .success-banner {
+    max-width: 720px;
+    margin: 40px auto 0;
+    padding: 0 24px;
+    text-align: center;
+  }
+  .success-check {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: var(--fresh-green);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    margin-bottom: 18px;
+    box-shadow: 0 8px 24px rgba(56,142,60,0.3);
+    animation: pop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes pop {
+    0% { transform: scale(0); }
+    100% { transform: scale(1); }
+  }
+  .success-banner h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 700;
+    font-size: 2rem;
+    margin-bottom: 8px;
+  }
+  .success-banner .order-num {
+    color: var(--rasa-red);
+    font-weight: 700;
+  }
+  .success-banner p {
+    color: var(--ink-muted);
+    font-size: 1.05rem;
+    margin-bottom: 6px;
+  }
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(244,162,97,0.15);
+    color: var(--risa-orange);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 12px;
+  }
+  .status-badge .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--risa-orange);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* Content */
+  .confirm-wrap {
+    max-width: 720px;
+    margin: 32px auto 56px;
+    padding: 0 24px;
+  }
+
+  .card {
+    background: var(--card-white);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 20px;
+    border: 1px solid var(--soft-grey);
+  }
+  .card h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card .card-sub {
+    font-size: 13px; color: var(--ink-muted);
+    margin-bottom: 18px;
+  }
+
+  /* Bank details */
+  .bank-box {
+    background: var(--warm-white);
+    border: 1px dashed var(--risa-orange);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+  .bank-name {
+    font-size: 13px; font-weight: 600;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  .bank-num {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--ink-dark);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .bank-holder {
+    font-size: 14px;
+    color: var(--ink-muted);
+  }
+  .copy-btn {
+    margin-top: 14px;
+    background: var(--card-white);
+    border: 1px solid var(--soft-grey);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--ink-dark);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: border-color 0.15s;
+  }
+  .copy-btn:hover { border-color: var(--rasa-red); color: var(--rasa-red); }
+
+  .amount-due {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--soft-grey);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .amount-due .label { font-size: 14px; color: var(--ink-muted); }
+  .amount-due .val {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--rasa-red);
+  }
+
+  .deadline {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--danger);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  /* Upload area */
+  .upload-zone {
+    border: 2px dashed var(--soft-grey);
+    border-radius: 12px;
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    background: var(--warm-white);
+  }
+  .upload-zone:hover {
+    border-color: var(--rasa-red);
+    background: rgba(230,57,70,0.03);
+  }
+  .upload-zone .up-icon {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+  }
+  .upload-zone h3 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .upload-zone p {
+    font-size: 13px;
+    color: var(--ink-muted);
+  }
+  .upload-zone .format-note {
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-top: 10px;
+    padding: 6px 12px;
+    background: var(--card-white);
+    border-radius: 999px;
+    display: inline-block;
+  }
+
+  /* Uploaded state */
+  .uploaded-preview {
+    display: none;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: rgba(56,142,60,0.06);
+    border: 1px solid rgba(56,142,60,0.2);
+    border-radius: 12px;
+  }
+  .uploaded-preview.show { display: flex; }
+  .uploaded-thumb {
+    width: 64px; height: 64px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #C8E6C9, #A5D6A7);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+  }
+  .uploaded-info { flex: 1; }
+  .uploaded-info h3 { font-size: 14px; font-weight: 600; color: var(--fresh-green); margin-bottom: 2px; }
+  .uploaded-info p { font-size: 12px; color: var(--ink-muted); }
+  .reupload-btn {
+    background: none;
+    border: 1px solid var(--soft-grey);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--ink-dark);
+  }
+  .reupload-btn:hover { border-color: var(--rasa-red); color: var(--rasa-red); }
+
+  /* Tracking link */
+  .tracking-box {
+    background: linear-gradient(135deg, rgba(230,57,70,0.06), rgba(244,162,97,0.06));
+    border: 1px solid rgba(230,57,70,0.15);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .tracking-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    background: var(--rasa-red);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .tracking-text { flex: 1; min-width: 200px; }
+  .tracking-text h3 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .tracking-text p { font-size: 13px; color: var(--ink-muted); }
+  .tracking-link {
+    background: var(--ink-dark);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.15s;
+  }
+  .tracking-link:hover { transform: translateY(-1px); }
+
+  /* Order summary mini */
+  .order-summary-mini {
+    background: var(--warm-white);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-top: 4px;
+  }
+  .osm-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 5px 0;
+    color: var(--ink-muted);
+  }
+  .osm-row .val { color: var(--ink-dark); font-weight: 500; }
+  .osm-group {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--risa-orange);
+    margin-top: 10px;
+    margin-bottom: 4px;
+  }
+  .osm-group:first-child { margin-top: 0; }
+  .osm-total {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 12px;
+    margin-top: 10px;
+    border-top: 1.5px solid var(--soft-grey);
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .osm-total .val { color: var(--rasa-red); }
+
+  /* Action buttons */
+  .actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .btn-secondary {
+    flex: 1;
+    background: var(--card-white);
+    border: 1px solid var(--soft-grey);
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--ink-dark);
+    text-align: center;
+    text-decoration: none;
+    transition: border-color 0.15s;
+    min-width: 160px;
+  }
+  .btn-secondary:hover { border-color: var(--rasa-red); }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .confirm-wrap { padding: 0 20px; }
+    .success-banner { padding: 0 20px; margin-top: 28px; }
+    .success-banner h1 { font-size: 1.6rem; }
+    .bank-num { font-size: 1.6rem; }
+    .card { padding: 18px; }
+    .topbar { padding: 10px 16px; }
+    .tracking-box { flex-direction: column; align-items: flex-start; }
+    .tracking-link { width: 100%; justify-content: center; }
+  }
+
+  .mockup-label {
+    position: fixed; top: 10px; right: 10px;
+    background: var(--ink-dark); color: white;
+    padding: 5px 14px; border-radius: 999px;
+    font-size: 11px; z-index: 100;
+  }
+</style>
+</head>
+<body>
+<div class="mockup-label">Mockup — Konfirmasi Pesanan</div>
+
+<div class="topbar">
+  <a class="logo-link" href="#">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100">
+      <rect width="400" height="100" fill="transparent"/>
+      <g transform="translate(10, 10) scale(0.6)">
+        <path d="M 65 45 Q 55 30 70 15" fill="none" stroke="#bda082" stroke-width="4" stroke-linecap="round"/>
+        <path d="M 85 45 Q 95 30 80 15" fill="none" stroke="#bda082" stroke-width="4" stroke-linecap="round"/>
+        <path d="M 30 85 L 20 85 M 120 85 L 130 85" fill="none" stroke="#4a2e15" stroke-width="6" stroke-linecap="round"/>
+        <path d="M 30 80 L 120 80 L 110 115 Q 75 125 40 115 Z" fill="#8a9a5b" stroke="#4a2e15" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M 25 80 Q 75 50 125 80 Z" fill="#d49a5b" stroke="#4a2e15" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M 68 62 L 82 62 L 80 52 L 70 52 Z" fill="#4a2e15"/>
+        <circle cx="75" cy="50" r="6" fill="#4a2e15"/>
+      </g>
+      <text x="110" y="55" font-family="'Fraunces', Georgia, serif" font-size="42" font-weight="bold" fill="#4a2e15">RasaRisa</text>
+      <text x="115" y="80" font-family="'Inter', Arial, sans-serif" font-size="16" fill="#604a36">makan enak, tanpa ribet</text>
+    </svg>
+  </a>
+  <button class="icon-btn">Pesanan Saya</button>
+</div>
+
+<!-- Success banner -->
+<div class="success-banner">
+  <div class="success-check">✓</div>
+  <h1>Pesanan <span class="order-num">#RSA-089</span> berhasil dibuat!</h1>
+  <p>Terima kasih, Budi. Kami udah terima pesananmu.</p>
+  <div class="status-badge"><span class="dot"></span> Menunggu Pembayaran</div>
+</div>
+
+<div class="confirm-wrap">
+
+  <!-- Bank details -->
+  <div class="card">
+    <h2>📤 Transfer ke rekening ini</h2>
+    <p class="card-sub">Transfer sesuai total di bawah, lalu unggah bukti transfer di bawahnya.</p>
+
+    <div class="bank-box">
+      <p class="bank-name">Bank BCA</p>
+      <p class="bank-num">1234567890</p>
+      <p class="bank-holder">a.n. RasaRisa Kitchen</p>
+      <button class="copy-btn">📋 Salin nomor rekening</button>
+
+      <div class="amount-due">
+        <span class="label">Jumlah yang harus ditransfer</span>
+        <span class="val">Rp 207.000</span>
+      </div>
+      <p class="deadline">⏰ Unggah bukti sebelum Senin, 20 Okt, 23.59</p>
+    </div>
+  </div>
+
+  <!-- Upload receipt -->
+  <div class="card">
+    <h2>🧾 Unggah bukti transfer</h2>
+    <p class="card-sub">Setelah transfer, unggah screenshot/foto bukti di sini. Kami verifikasi, lalu konfirmasi pesananmu.</p>
+
+    <div class="upload-zone">
+      <div class="up-icon">📷</div>
+      <h3>Klik untuk unggah bukti transfer</h3>
+      <p>atau seret foto ke sini</p>
+      <span class="format-note">JPG atau PNG, maksimal 5MB</span>
+    </div>
+
+    <!-- Uploaded preview (hidden by default, toggle via JS in real app) -->
+    <div class="uploaded-preview">
+      <div class="uploaded-thumb">🧾</div>
+      <div class="uploaded-info">
+        <h3>Bukti transfer berhasil diunggah</h3>
+        <p>bukti_tf.jpg · 1.8 MB · baru saja</p>
+      </div>
+      <button class="reupload-btn">Ganti</button>
+    </div>
+  </div>
+
+  <!-- Tracking link -->
+  <div class="card">
+    <h2>🔗 Pantau pesananmu</h2>
+    <p class="card-sub">Simpan link ini. Kamu bisa cek status pesanan kapan saja tanpa chat kami.</p>
+
+    <div class="tracking-box">
+      <div class="tracking-icon">📍</div>
+      <div class="tracking-text">
+        <h3>Link tracking pesanan</h3>
+        <p>rasarisa.id/track/a7f3c9e2</p>
+      </div>
+      <a class="tracking-link" href="#">Buka tracking →</a>
+    </div>
+  </div>
+
+  <!-- Order summary mini -->
+  <div class="card">
+    <h2>Ringkasan pesanan</h2>
+    <p class="card-sub">#RSA-089 · Budi Santoso · Antar ke rumah</p>
+
+    <div class="order-summary-mini">
+      <p class="osm-group">Ready Sabtu, 18 Okt</p>
+      <div class="osm-row"><span>Nasi Liwet Box ×2</span><span class="val">Rp 70.000</span></div>
+      <div class="osm-row"><span>Ayam Bakar Sambal Matah ×1</span><span class="val">Rp 42.000</span></div>
+
+      <p class="osm-group">Ready Senin, 20 Okt</p>
+      <div class="osm-row"><span>Ikan Asam Manis ×1</span><span class="val">Rp 45.000</span></div>
+      <div class="osm-row"><span>Es Cendol Durian ×2</span><span class="val">Rp 50.000</span></div>
+
+      <div class="osm-row"><span>Ongkos kirim</span><span class="val" style="color:var(--fresh-green)">Gratis</span></div>
+
+      <div class="osm-total">
+        <span>Total</span>
+        <span class="val">Rp 207.000</span>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a class="btn-secondary" href="#">← Kembali ke menu</a>
+      <a class="btn-secondary" href="#">Lihat pesanan saya</a>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

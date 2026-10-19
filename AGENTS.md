@@ -3,8 +3,28 @@
 You are implementing RasaRisa v2. Read these files IN THIS ORDER before writing any code:
 
 1. `docs/superpowers/specs/2026-10-19-rasarisa-design.md` — full design doc (intent, goals, constraints, data model, screens)
-2. `PROGRESS.md` — what's done, in-progress, blocked, next (update as you go)
-3. `ARCHITECTURE.md` — code structure, key files, decisions (update as you go)
+2. `docs/mockups/*.html` — APPROVED mockups. These are the design CONTRACT, not reference. Every UI page MUST match its mockup 1:1 in structure, layout, components, copy. Before building any page, read the matching mockup first.
+3. `PROGRESS.md` — what's done, in-progress, blocked, next (update as you go)
+4. `ARCHITECTURE.md` — code structure, key files, decisions (update as you go)
+
+## Mockup → Page Mapping (CONTRACT)
+
+| Mockup file | Page route | Status |
+|-------------|-----------|--------|
+| `docs/mockups/catalog-v3.html` | `/` (buyer catalog) | MUST match |
+| `docs/mockups/checkout.html` | `/checkout` | MUST match |
+| `docs/mockups/order-confirmation.html` | `/order/[id]` | MUST match |
+| `docs/mockups/tracking.html` | `/track/[trackingId]` | MUST match |
+| `docs/mockups/admin-dashboard.html` | `/admin` + admin layout | MUST match |
+
+## Build Rule (non-negotiable)
+
+Before building ANY UI page:
+1. Read the matching mockup HTML file completely
+2. Extract: layout structure, component hierarchy, copy text, class names, color usage, responsive breakpoints
+3. Build the page to match the mockup 1:1
+4. After building, open both side-by-side and verify visual match
+5. If mockup has feature not in data model, flag it — do not silently skip
 
 ## Tech Stack (locked)
 

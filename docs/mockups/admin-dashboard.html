@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RasaRisa — Admin Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --warm-white: #FFF3E0;
+    --card-white: #FFFFFF;
+    --rasa-red: #E63946;
+    --rasa-red-dark: #C92F3C;
+    --risa-orange: #F4A261;
+    --ink-dark: #1D1D1D;
+    --ink-muted: #555555;
+    --soft-grey: #E8E2D5;
+    --fresh-green: #388E3C;
+    --danger: #D32F2F;
+    --pot-brown: #4a2e15;
+    --sidebar-bg: #2a1f15;
+    --sidebar-text: #e8d5c0;
+    --sidebar-active: #E63946;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--warm-white);
+    color: var(--ink-dark);
+    line-height: 1.55;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    padding: 24px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-logo {
+    padding: 0 24px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 16px;
+  }
+  .sidebar-logo svg { height: 40px; width: auto; }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 24px;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    border-left: 3px solid transparent;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.05); }
+  .nav-item.active {
+    background: rgba(230,57,70,0.15);
+    color: white;
+    border-left-color: var(--sidebar-active);
+  }
+  .nav-item .icon { font-size: 1.1rem; width: 20px; text-align: center; }
+  .nav-item .badge {
+    margin-left: auto;
+    background: var(--rasa-red);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+  .nav-section {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(232,213,192,0.5);
+    padding: 16px 24px 8px;
+    font-weight: 600;
+  }
+
+  /* Main */
+  .main {
+    padding: 28px 32px;
+    overflow-y: auto;
+  }
+  .main-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .main-head h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 700;
+    font-size: 1.8rem;
+  }
+  .main-head .sub { color: var(--ink-muted); font-size: 14px; margin-top: 2px; }
+  .head-actions { display: flex; gap: 10px; }
+  .btn-primary {
+    background: var(--rasa-red);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .btn-primary:hover { background: var(--rasa-red-dark); transform: translateY(-1px); }
+  .btn-ghost {
+    background: var(--card-white);
+    border: 1px solid var(--soft-grey);
+    color: var(--ink-dark);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-ghost:hover { border-color: var(--rasa-red); }
+
+  /* Stats row */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--card-white);
+    border-radius: 14px;
+    padding: 20px;
+    border: 1px solid var(--soft-grey);
+  }
+  .stat-card .stat-icon {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+  }
+  .stat-card .stat-label {
+    font-size: 13px;
+    color: var(--ink-muted);
+    margin-bottom: 4px;
+  }
+  .stat-card .stat-val {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.7rem;
+    font-weight: 700;
+  }
+  .stat-card .stat-trend {
+    font-size: 12px;
+    margin-top: 6px;
+    font-weight: 600;
+  }
+  .stat-trend.up { color: var(--fresh-green); }
+  .stat-trend.down { color: var(--danger); }
+
+  /* PO management */
+  .po-section {
+    background: var(--card-white);
+    border-radius: 14px;
+    border: 1px solid var(--soft-grey);
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .po-section-head {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--soft-grey);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .po-section-head h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  /* PO list */
+  .po-list { display: flex; flex-direction: column; gap: 12px; padding: 16px; }
+  .po-row {
+    display: grid;
+    grid-template-columns: 52px 1fr 90px 110px 80px;
+    gap: 20px;
+    align-items: center;
+    padding: 18px 20px;
+    border-radius: 12px;
+    transition: background 0.15s, border-color 0.15s;
+    border: 1px solid var(--soft-grey);
+    background: var(--card-white);
+  }
+  .po-row:hover { background: var(--warm-white); border-color: var(--risa-orange); }
+  .po-date-badge {
+    width: 52px; height: 52px;
+    border-radius: 12px;
+    background: var(--warm-white);
+    border: 1px solid var(--soft-grey);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .po-date-badge .day { font-size: 11px; font-weight: 600; color: var(--ink-muted); text-transform: uppercase; }
+  .po-date-badge .num { font-family: 'Fraunces', Georgia, serif; font-size: 20px; font-weight: 700; color: var(--ink-dark); line-height: 1; }
+  .po-info { min-width: 0; }
+  .po-title { font-weight: 600; font-size: 15px; margin-bottom: 3px; }
+  .po-meta { font-size: 13px; color: var(--ink-muted); }
+  .po-orders {
+    text-align: center;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: var(--warm-white);
+  }
+  .po-orders strong { display: block; font-size: 18px; color: var(--ink-dark); font-family: 'Fraunces', serif; line-height: 1.1; }
+  .po-orders span { font-size: 11px; color: var(--ink-muted); }
+  .po-status {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    text-align: center;
+  }
+  .po-status.open { background: rgba(56,142,60,0.12); color: var(--fresh-green); }
+  .po-status.soon { background: rgba(244,162,97,0.15); color: var(--risa-orange); }
+  .po-status.closed { background: rgba(85,85,85,0.1); color: var(--ink-muted); }
+  .po-row .action-btn { justify-self: center; }
+
+  /* Orders table */
+  .orders-table-wrap {
+    background: var(--card-white);
+    border-radius: 14px;
+    border: 1px solid var(--soft-grey);
+    overflow: hidden;
+  }
+  .filter-bar {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--soft-grey);
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-chip {
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--soft-grey);
+    background: var(--card-white);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--ink-muted);
+    transition: all 0.15s;
+  }
+  .filter-chip.active { background: var(--ink-dark); color: white; border-color: var(--ink-dark); }
+  .filter-chip:hover:not(.active) { border-color: var(--rasa-red); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--soft-grey);
+    background: var(--warm-white);
+  }
+  td {
+    padding: 14px 16px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--soft-grey);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(244,162,97,0.03); }
+  .order-id-cell { font-weight: 600; color: var(--rasa-red); }
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .sb-waiting { background: rgba(244,162,97,0.15); color: var(--risa-orange); }
+  .sb-confirmed { background: rgba(56,142,60,0.12); color: var(--fresh-green); }
+  .sb-processing { background: rgba(33,150,243,0.12); color: #1976D2; }
+  .sb-ready { background: rgba(156,39,176,0.12); color: #8E24AA; }
+  .sb-done { background: rgba(85,85,85,0.1); color: var(--ink-muted); }
+  .sb-expired { background: rgba(211,47,47,0.1); color: var(--danger); }
+  .status-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  .action-btn {
+    background: var(--card-white);
+    border: 1px solid var(--soft-grey);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--ink-dark);
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .action-btn:hover { border-color: var(--rasa-red); color: var(--rasa-red); }
+  .action-btn.primary { background: var(--rasa-red); color: white; border-color: var(--rasa-red); }
+  .action-btn.primary:hover { background: var(--rasa-red-dark); }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; height: auto; display: flex; overflow-x: auto; padding: 12px; }
+    .sidebar-logo, .nav-section { display: none; }
+    .nav-item { padding: 10px 16px; border-left: none; border-bottom: 3px solid transparent; white-space: nowrap; }
+    .nav-item.active { border-bottom-color: var(--sidebar-active); border-left: none; }
+    .main { padding: 20px 16px; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .po-row { grid-template-columns: 1fr; gap: 8px; }
+    table { font-size: 13px; }
+    th, td { padding: 10px 12px; }
+    .hide-mobile { display: none; }
+  }
+
+  .mockup-label {
+    position: fixed; top: 10px; right: 10px;
+    background: var(--ink-dark); color: white;
+    padding: 5px 14px; border-radius: 999px;
+    font-size: 11px; z-index: 100;
+  }
+</style>
+</head>
+<body>
+<div class="mockup-label">Mockup — Admin Dashboard</div>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100">
+        <rect width="400" height="100" fill="transparent"/>
+        <g transform="translate(10, 10) scale(0.6)">
+          <path d="M 65 45 Q 55 30 70 15" fill="none" stroke="#bda082" stroke-width="4" stroke-linecap="round"/>
+          <path d="M 85 45 Q 95 30 80 15" fill="none" stroke="#bda082" stroke-width="4" stroke-linecap="round"/>
+          <path d="M 30 85 L 20 85 M 120 85 L 130 85" fill="none" stroke="#e8d5c0" stroke-width="6" stroke-linecap="round"/>
+          <path d="M 30 80 L 120 80 L 110 115 Q 75 125 40 115 Z" fill="#8a9a5b" stroke="#e8d5c0" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M 25 80 Q 75 50 125 80 Z" fill="#d49a5b" stroke="#e8d5c0" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M 68 62 L 82 62 L 80 52 L 70 52 Z" fill="#e8d5c0"/>
+          <circle cx="75" cy="50" r="6" fill="#e8d5c0"/>
+        </g>
+        <text x="110" y="55" font-family="'Fraunces', Georgia, serif" font-size="42" font-weight="bold" fill="#e8d5c0">RasaRisa</text>
+        <text x="115" y="80" font-family="'Inter', Arial, sans-serif" font-size="16" fill="#b39a82">makan enak, tanpa ribet</text>
+      </svg>
+    </div>
+
+    <div class="nav-section">Utama</div>
+    <a class="nav-item active"><span class="icon">📊</span> Dashboard</a>
+    <a class="nav-item"><span class="icon">📦</span> Pesanan <span class="badge">5</span></a>
+    <a class="nav-item"><span class="icon">🍽️</span> Katalog Menu</a>
+    <a class="nav-item"><span class="icon">📅</span> Kelola PO</a>
+
+    <div class="nav-section">Laporan</div>
+    <a class="nav-item"><span class="icon">💰</span> Laporan Keuangan</a>
+    <a class="nav-item"><span class="icon">📈</span> Analytics</a>
+
+    <div class="nav-section">Pengaturan</div>
+    <a class="nav-item"><span class="icon">⚙️</span> Pengaturan</a>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="main-head">
+      <div>
+        <h1>Selamat datang, Risa 👋</h1>
+        <p class="sub">Ini ringkasan RasaRisa hari ini, 19 Okt 2026.</p>
+      </div>
+      <div class="head-actions">
+        <button class="btn-ghost">📅 Kelola PO</button>
+        <button class="btn-primary">+ Buka PO Baru</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-icon">📦</div>
+        <div class="stat-label">Pesanan hari ini</div>
+        <div class="stat-val">12</div>
+        <div class="stat-trend up">↑ 4 dari kemarin</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-label">Perlu verifikasi</div>
+        <div class="stat-val">5</div>
+        <div class="stat-trend down">↓ 2 dari kemarin</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-label">Pendapatan (PO buka)</div>
+        <div class="stat-val">Rp 2,4jt</div>
+        <div class="stat-trend up">↑ 18% dari PO lalu</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-label">Selesai bulan ini</div>
+        <div class="stat-val">87</div>
+        <div class="stat-trend up">↑ 12 dari bulan lalu</div>
+      </div>
+    </div>
+
+    <!-- PO management -->
+    <div class="po-section">
+      <div class="po-section-head">
+        <h2>📅 PO yang sedang berjalan</h2>
+        <button class="btn-ghost">Lihat semua</button>
+      </div>
+      <div class="po-list">
+        <div class="po-row">
+          <div class="po-date-badge"><span class="day">Sab</span><span class="num">18</span></div>
+          <div class="po-info">
+            <div class="po-title">PO Sabtu, 18 Okt</div>
+            <div class="po-meta">Tutup Jumat, 17 Okt 23.59</div>
+          </div>
+          <div class="po-orders"><strong>24</strong><span>pesanan</span></div>
+          <div class="po-status soon">Tutup 6 jam</div>
+          <button class="action-btn primary">Lihat</button>
+        </div>
+        <div class="po-row">
+          <div class="po-date-badge"><span class="day">Sen</span><span class="num">20</span></div>
+          <div class="po-info">
+            <div class="po-title">PO Senin, 20 Okt</div>
+            <div class="po-meta">Tutup Minggu, 19 Okt 23.59</div>
+          </div>
+          <div class="po-orders"><strong>18</strong><span>pesanan</span></div>
+          <div class="po-status open">Dibuka</div>
+          <button class="action-btn primary">Lihat</button>
+        </div>
+        <div class="po-row">
+          <div class="po-date-badge"><span class="day">Rab</span><span class="num">15</span></div>
+          <div class="po-info">
+            <div class="po-title">PO Rabu, 15 Okt</div>
+            <div class="po-meta">Tutup Selasa, 14 Okt 23.59</div>
+          </div>
+          <div class="po-orders"><strong>31</strong><span>pesanan</span></div>
+          <div class="po-status closed">Selesai</div>
+          <button class="action-btn">Lihat</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders needing verification -->
+    <div class="orders-table-wrap">
+      <div class="filter-bar">
+        <button class="filter-chip active">Perlu verifikasi (5)</button>
+        <button class="filter-chip">Menunggu bayar</button>
+        <button class="filter-chip">Diproses</button>
+        <button class="filter-chip">Siap kirim</button>
+        <button class="filter-chip">Selesai</button>
+        <button class="filter-chip">Semua</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Pesanan</th>
+            <th class="hide-mobile">Customer</th>
+            <th class="hide-mobile">PO Ready</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="order-id-cell">#RSA-089</td>
+            <td class="hide-mobile">Budi Santoso</td>
+            <td class="hide-mobile">18 Okt + 20 Okt</td>
+            <td>Rp 207.000</td>
+            <td><span class="status-badge sb-waiting"><span class="dot"></span>Menunggu verifikasi</span></td>
+            <td><button class="action-btn primary">Lihat bukti</button></td>
+          </tr>
+          <tr>
+            <td class="order-id-cell">#RSA-088</td>
+            <td class="hide-mobile">Siti Aminah</td>
+            <td class="hide-mobile">18 Okt</td>
+            <td>Rp 84.000</td>
+            <td><span class="status-badge sb-waiting"><span class="dot"></span>Menunggu verifikasi</span></td>
+            <td><button class="action-btn primary">Lihat bukti</button></td>
+          </tr>
+          <tr>
+            <td class="order-id-cell">#RSA-087</td>
+            <td class="hide-mobile">Andi Wijaya</td>
+            <td class="hide-mobile">20 Okt</td>
+            <td>Rp 126.000</td>
+            <td><span class="status-badge sb-waiting"><span class="dot"></span>Menunggu verifikasi</span></td>
+            <td><button class="action-btn primary">Lihat bukti</button></td>
+          </tr>
+          <tr>
+            <td class="order-id-cell">#RSA-086</td>
+            <td class="hide-mobile">Dewi Lestari</td>
+            <td class="hide-mobile">18 Okt</td>
+            <td>Rp 42.000</td>
+            <td><span class="status-badge sb-confirmed"><span class="dot"></span>Dikonfirmasi</span></td>
+            <td><button class="action-btn">Update status</button></td>
+          </tr>
+          <tr>
+            <td class="order-id-cell">#RSA-085</td>
+            <td class="hide-mobile">Rudi Hartono</td>
+            <td class="hide-mobile">18 Okt + 20 Okt</td>
+            <td>Rp 175.000</td>
+            <td><span class="status-badge sb-ready"><span class="dot"></span>Siap dikirim</span></td>
+            <td><button class="action-btn">Tandai selesai</button></td>
+          </tr>
+          <tr>
+            <td class="order-id-cell">#RSA-084</td>
+            <td class="hide-mobile">Maya Putri</td>
+            <td class="hide-mobile">15 Okt</td>
+            <td>Rp 70.000</td>
+            <td><span class="status-badge sb-expired"><span class="dot"></span>Expired</span></td>
+            <td><button class="action-btn">Lihat</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RasaRisa — Lacak Pesanan</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --warm-white: #FFF3E0;
+    --card-white: #FFFFFF;
+    --rasa-red: #E63946;
+    --rasa-red-dark: #C92F3C;
+    --risa-orange: #F4A261;
+    --ink-dark: #1D1D1D;
+    --ink-muted: #555555;
+    --soft-grey: #E8E2D5;
+    --fresh-green: #388E3C;
+    --danger: #D32F2F;
+    --pot-brown: #4a2e15;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--warm-white);
+    color: var(--ink-dark);
+    line-height: 1.55;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(244,162,97,0.06) 0%, transparent 45%),
+      radial-gradient(circle at 85% 60%, rgba(230,57,70,0.04) 0%, transparent 45%);
+  }
+
+  .topbar {
+    background: rgba(255,243,224,0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--soft-grey);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .logo-link { display: flex; align-items: center; gap: 4px; text-decoration: none; }
+  .logo-link svg { display: block; height: 36px; width: auto; }
+
+  .track-wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 36px 24px 56px;
+  }
+
+  /* Header */
+  .track-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .track-header .order-id {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .track-header h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 700;
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+  .current-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(244,162,97,0.15);
+    color: var(--risa-orange);
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .current-status.confirmed { background: rgba(56,142,60,0.12); color: var(--fresh-green); }
+  .current-status .dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: currentColor;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* Timeline */
+  .timeline {
+    background: var(--card-white);
+    border-radius: 16px;
+    padding: 32px 28px;
+    border: 1px solid var(--soft-grey);
+    margin-bottom: 24px;
+  }
+  .timeline h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: var(--ink-muted);
+  }
+
+  .tl-step {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 16px;
+    position: relative;
+    padding-bottom: 28px;
+  }
+  .tl-step:last-child { padding-bottom: 0; }
+
+  .tl-step::before {
+    content: '';
+    position: absolute;
+    left: 17px;
+    top: 36px;
+    bottom: 0;
+    width: 2px;
+    background: var(--soft-grey);
+  }
+  .tl-step:last-child::before { display: none; }
+
+  .tl-dot {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--warm-white);
+    border: 2px solid var(--soft-grey);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink-muted);
+    z-index: 1;
+    position: relative;
+  }
+
+  .tl-step.done .tl-dot {
+    background: var(--fresh-green);
+    border-color: var(--fresh-green);
+    color: white;
+  }
+  .tl-step.current .tl-dot {
+    background: var(--risa-orange);
+    border-color: var(--risa-orange);
+    color: white;
+    box-shadow: 0 0 0 6px rgba(244,162,97,0.18);
+    animation: ring 2s infinite;
+  }
+  @keyframes ring {
+    0%,100% { box-shadow: 0 0 0 6px rgba(244,162,97,0.18); }
+    50% { box-shadow: 0 0 0 10px rgba(244,162,97,0.08); }
+  }
+
+  .tl-content h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    color: var(--ink-dark);
+  }
+  .tl-step.done .tl-content h3 { color: var(--ink-dark); }
+  .tl-step:not(.done):not(.current) .tl-content h3 { color: var(--ink-muted); }
+  .tl-step:not(.done):not(.current) .tl-content .tl-time { display: none; }
+
+  .tl-time {
+    font-size: 12px;
+    color: var(--ink-muted);
+  }
+  .tl-step.done .tl-time { color: var(--fresh-green); font-weight: 500; }
+  .tl-step.current .tl-time { color: var(--risa-orange); font-weight: 600; }
+
+  .tl-note {
+    font-size: 13px;
+    color: var(--ink-muted);
+    margin-top: 6px;
+    padding: 10px 14px;
+    background: var(--warm-white);
+    border-radius: 8px;
+    border-left: 3px solid var(--risa-orange);
+  }
+  .tl-step.done .tl-note { border-left-color: var(--fresh-green); }
+
+  /* Order summary (no personal data) */
+  .order-card {
+    background: var(--card-white);
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid var(--soft-grey);
+    margin-bottom: 20px;
+  }
+  .order-card h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .ready-group-mini {
+    margin-bottom: 16px;
+  }
+  .ready-group-mini:last-child { margin-bottom: 0; }
+  .rgm-head {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600;
+    color: var(--risa-orange);
+    margin-bottom: 8px;
+  }
+  .rgm-head .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--risa-orange); }
+  .rgm-row {
+    display: flex; justify-content: space-between;
+    font-size: 14px; padding: 5px 0;
+    color: var(--ink-muted);
+  }
+  .rgm-row .val { color: var(--ink-dark); font-weight: 500; }
+
+  .fulfill-info {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--soft-grey);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+  }
+  .fulfill-info .icon { font-size: 1.2rem; }
+
+  .upload-cta {
+    margin-top: 20px;
+    background: linear-gradient(135deg, rgba(230,57,70,0.06), rgba(244,162,97,0.06));
+    border: 1px dashed var(--risa-orange);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+  .upload-cta h3 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1rem;
+    margin-bottom: 6px;
+  }
+  .upload-cta p { font-size: 13px; color: var(--ink-muted); margin-bottom: 14px; }
+  .upload-btn {
+    background: var(--rasa-red);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .upload-btn:hover { background: var(--rasa-red-dark); }
+
+  /* Invalid link state */
+  .invalid-state {
+    display: none;
+    text-align: center;
+    padding: 60px 24px;
+  }
+  .invalid-state.show { display: block; }
+  .invalid-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.4;
+  }
+  .invalid-state h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.6rem;
+    margin-bottom: 10px;
+    color: var(--ink-muted);
+  }
+  .invalid-state p { color: var(--ink-muted); margin-bottom: 24px; }
+
+  .home-btn {
+    display: inline-block;
+    background: var(--ink-dark);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .track-wrap { padding: 24px 20px 48px; }
+    .track-header h1 { font-size: 1.5rem; }
+    .timeline { padding: 24px 20px; }
+    .tl-step { grid-template-columns: 32px 1fr; gap: 12px; }
+    .tl-dot { width: 32px; height: 32px; font-size: 13px; }
+    .tl-step::before { left: 15px; }
+    .topbar { padding: 10px 16px; }
+  }
+
+  .mockup-label {
+    position: fixed; top: 10px; right: 10px;
+    background: var(--ink-dark); color: white;
+    padding: 5px 14px; border-radius: 999px;
+    font-size: 11px; z-index: 100;
+  }
+</style>
+</head>
+<body>
+<div class="mockup-label">Mockup — Tracking Page</div>
+
+<div class="topbar">
+  <a class="logo-link" href="#">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100">
+      <rect width="400" height="100" fill="transparent"/>
+      <g transform="translate(10, 10) scale(0.6)">
+        <path d="M 65 45 Q 55 30 70 15" fill="none" stroke="#bda082" stroke-width="4" stroke-linecap="round"/>
+        <path d="M 85 45 Q 95 30 80 15" fill="none" stroke="#bda082" stroke-width="4" stroke-linecap="round"/>
+        <path d="M 30 85 L 20 85 M 120 85 L 130 85" fill="none" stroke="#4a2e15" stroke-width="6" stroke-linecap="round"/>
+        <path d="M 30 80 L 120 80 L 110 115 Q 75 125 40 115 Z" fill="#8a9a5b" stroke="#4a2e15" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M 25 80 Q 75 50 125 80 Z" fill="#d49a5b" stroke="#4a2e15" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M 68 62 L 82 62 L 80 52 L 70 52 Z" fill="#4a2e15"/>
+        <circle cx="75" cy="50" r="6" fill="#4a2e15"/>
+      </g>
+      <text x="110" y="55" font-family="'Fraunces', Georgia, serif" font-size="42" font-weight="bold" fill="#4a2e15">RasaRisa</text>
+      <text x="115" y="80" font-family="'Inter', Arial, sans-serif" font-size="16" fill="#604a36">makan enak, tanpa ribet</text>
+    </svg>
+  </a>
+</div>
+
+<!-- Valid tracking state -->
+<div class="track-wrap">
+  <div class="track-header">
+    <p class="order-id">Pesanan #RSA-089</p>
+    <h1>Lacak Pesananmu</h1>
+    <div class="current-status"><span class="dot"></span> Menunggu Pembayaran</div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="timeline">
+    <h2>Progress pesanan</h2>
+
+    <div class="tl-step done">
+      <div class="tl-dot">✓</div>
+      <div class="tl-content">
+        <h3>Pesanan Dibuat</h3>
+        <p class="tl-time">19 Okt 2026, 14.30</p>
+      </div>
+    </div>
+
+    <div class="tl-step current">
+      <div class="tl-dot">2</div>
+      <div class="tl-content">
+        <h3>Menunggu Pembayaran</h3>
+        <p class="tl-time">Sedang menunggu bukti transfer</p>
+        <div class="tl-note">
+          ⏰ Unggah bukti transfer sebelum <strong>20 Okt, 23.59</strong>. Kalau lewat, pesanan otomatis dibatalkan.
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-step">
+      <div class="tl-dot">3</div>
+      <div class="tl-content">
+        <h3>Pembayaran Dikonfirmasi</h3>
+      </div>
+    </div>
+
+    <div class="tl-step">
+      <div class="tl-dot">4</div>
+      <div class="tl-content">
+        <h3>Diproses</h3>
+      </div>
+    </div>
+
+    <div class="tl-step">
+      <div class="tl-dot">5</div>
+      <div class="tl-content">
+        <h3>Siap Dikirim</h3>
+      </div>
+    </div>
+
+    <div class="tl-step">
+      <div class="tl-dot">6</div>
+      <div class="tl-content">
+        <h3>Selesai</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order summary (NO personal data) -->
+  <div class="order-card">
+    <h2>Detail pesanan</h2>
+
+    <div class="ready-group-mini">
+      <div class="rgm-head"><span class="dot"></span> Ready Sabtu, 18 Okt</div>
+      <div class="rgm-row"><span>Nasi Liwet Box ×2</span><span class="val">Rp 70.000</span></div>
+      <div class="rgm-row"><span>Ayam Bakar Sambal Matah ×1</span><span class="val">Rp 42.000</span></div>
+    </div>
+
+    <div class="ready-group-mini">
+      <div class="rgm-head"><span class="dot"></span> Ready Senin, 20 Okt</div>
+      <div class="rgm-row"><span>Ikan Asam Manis ×1</span><span class="val">Rp 45.000</span></div>
+      <div class="rgm-row"><span>Es Cendol Durian ×2</span><span class="val">Rp 50.000</span></div>
+    </div>
+
+    <div class="fulfill-info">
+      <span class="icon">🛵</span>
+      <span>Antar ke rumah · Gratis</span>
+    </div>
+
+    <!-- Upload CTA (shown when status = Menunggu Pembayaran) -->
+    <div class="upload-cta">
+      <h3>Unggah bukti transfer</h3>
+      <p>Belum unggah bukti? Transfer dulu, lalu unggah di sini.</p>
+      <button class="upload-btn">📷 Unggah bukti</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

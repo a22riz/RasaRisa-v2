@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RasaRisa — Katalog</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --warm-white: #FFF3E0;
+    --card-white: #FFFFFF;
+    --rasa-red: #E63946;
+    --rasa-red-dark: #C92F3C;
+    --risa-orange: #F4A261;
+    --ink-dark: #1D1D1D;
+    --ink-muted: #555555;
+    --soft-grey: #E8E2D5;
+    --fresh-green: #388E3C;
+    --pot-brown: #4a2e15;
+    --pot-olive: #8a9a5b;
+    --pot-tan: #d49a5b;
+    --pot-steam: #bda082;
+    --pot-cream: #fdfbf7;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--warm-white);
+    color: var(--ink-dark);
+    line-height: 1.55;
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(244,162,97,0.06) 0%, transparent 45%),
+      radial-gradient(circle at 85% 60%, rgba(230,57,70,0.04) 0%, transparent 45%);
+  }
+
+  /* Topbar */
+  .topbar {
+    background: rgba(255,243,224,0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--soft-grey);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .logo-link {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+  }
+  .logo-link svg { display: block; height: 36px; width: auto; }
+  .topbar-actions { display: flex; gap: 10px; align-items: center; }
+  .icon-btn {
+    background: var(--card-white);
+    border: 1px solid var(--soft-grey);
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--ink-dark);
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .icon-btn:hover { border-color: var(--rasa-red); transform: translateY(-1px); }
+  .cart-btn { position: relative; background: var(--ink-dark); color: white; border-color: var(--ink-dark); }
+  .cart-btn:hover { border-color: var(--rasa-red); }
+  .badge-cart {
+    background: var(--rasa-red);
+    color: white;
+    border-radius: 999px;
+    padding: 1px 7px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 2px;
+  }
+
+  /* Hero */
+  .hero {
+    padding: 56px 24px 40px;
+    max-width: 1120px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 40px;
+    align-items: center;
+  }
+  .hero-text h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 700;
+    font-size: 2.75rem;
+    line-height: 1.1;
+    margin-bottom: 14px;
+    color: var(--ink-dark);
+  }
+  .hero-text h1 .accent {
+    color: var(--rasa-red);
+    font-style: italic;
+  }
+  .hero-text .lede {
+    color: var(--ink-muted);
+    font-size: 1.1rem;
+    margin-bottom: 22px;
+    max-width: 480px;
+  }
+  .po-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(56,142,60,0.12);
+    color: var(--fresh-green);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+  .po-pill .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--fresh-green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--rasa-red);
+    color: white;
+    padding: 13px 28px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+  .hero-cta:hover {
+    background: var(--rasa-red-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(230,57,70,0.28);
+  }
+  .hero-cta .arrow { transition: transform 0.15s; }
+  .hero-cta:hover .arrow { transform: translateX(3px); }
+
+  .hero-img {
+    aspect-ratio: 4/3.2;
+    border-radius: 18px;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--risa-orange) 0%, var(--rasa-red) 100%);
+    position: relative;
+    box-shadow: 0 14px 36px rgba(0,0,0,0.14);
+  }
+  .hero-img::after {
+    content: "🍜";
+    font-size: 5.5rem;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+  }
+  .hero-img .tag {
+    position: absolute;
+    top: 16px; left: 16px;
+    background: rgba(255,255,255,0.92);
+    color: var(--ink-dark);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    backdrop-filter: blur(4px);
+  }
+
+  /* PO selector */
+  .po-bar {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 24px 28px;
+  }
+  .po-bar-label {
+    font-size: 13px;
+    color: var(--ink-muted);
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+  .po-chips { display: flex; gap: 10px; flex-wrap: wrap; }
+  .po-chip {
+    background: var(--card-white);
+    border: 1px solid var(--soft-grey);
+    border-radius: 12px;
+    padding: 12px 18px;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    transition: all 0.15s;
+    min-width: 160px;
+  }
+  .po-chip .po-date { font-weight: 600; font-size: 15px; }
+  .po-chip .po-meta { font-size: 12px; color: var(--ink-muted); }
+  .po-chip.active {
+    background: var(--ink-dark);
+    color: white;
+    border-color: var(--ink-dark);
+  }
+  .po-chip.active .po-meta { color: rgba(255,255,255,0.7); }
+  .po-chip:hover:not(.active) { border-color: var(--rasa-red); }
+  .po-chip.closed { opacity: 0.55; cursor: not-allowed; }
+  .po-chip.closed .po-meta::before { content: "✓ "; color: var(--fresh-green); }
+
+  /* Menu */
+  .menu-section {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 24px 56px;
+  }
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--soft-grey);
+    padding-bottom: 14px;
+  }
+  .section-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: 1.6rem;
+  }
+  .section-sub {
+    color: var(--ink-muted);
+    font-size: 14px;
+  }
+  .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 22px;
+  }
+  .menu-card {
+    background: var(--card-white);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    cursor: pointer;
+    transition: transform 0.18s, box-shadow 0.18s;
+    border: 1px solid transparent;
+  }
+  .menu-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.10);
+    border-color: rgba(230,57,70,0.2);
+  }
+  .menu-card-img {
+    aspect-ratio: 4/3;
+    position: relative;
+  }
+  .menu-card-img.a { background: linear-gradient(135deg, #FFCDD2, #EF9A9A); }
+  .menu-card-img.b { background: linear-gradient(135deg, #FFE0B2, #FFCC80); }
+  .menu-card-img.c { background: linear-gradient(135deg, #C8E6C9, #A5D6A7); }
+  .menu-card-img.d { background: linear-gradient(135deg, #FFF9C4, #FFF176); }
+  .menu-card-img .emoji {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    font-size: 2.6rem;
+  }
+  .menu-card-body { padding: 16px 18px 18px; }
+  .menu-card-body h3 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.18rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .menu-card-body .desc {
+    font-size: 13px;
+    color: var(--ink-muted);
+    margin-bottom: 14px;
+    line-height: 1.45;
+  }
+  .menu-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .price {
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: var(--ink-dark);
+  }
+  .add-btn {
+    background: var(--rasa-red);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .add-btn:hover { background: var(--rasa-red-dark); transform: scale(1.04); }
+
+  .ready-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--risa-orange);
+    background: rgba(244,162,97,0.15);
+    padding: 3px 9px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero { grid-template-columns: 1fr; padding: 36px 20px 28px; gap: 24px; }
+    .hero-text h1 { font-size: 2rem; }
+    .menu-grid { grid-template-columns: 1fr; }
+    .menu-section, .po-bar { padding-left: 20px; padding-right: 20px; }
+    .topbar { padding: 10px 16px; }
+    .icon-btn { padding: 7px 12px; font-size: 13px; }
+    .logo-link svg { height: 30px; }
+  }
+
+  .mockup-label {
+    position: fixed;
+    top: 10px; right: 10px;
+    background: var(--ink-dark);
+    color: white;
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-size: 11px;
+    z-index: 100;
+  }
+</style>
+</head>
+<body>
+<div class="mockup-label">Mockup v3 — Logo asli</div>
+
+<div class="topbar">
+  <a class="logo-link" href="#">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100">
+      <rect width="400" height="100" fill="transparent"/>
+      <g transform="translate(10, 10) scale(0.6)">
+        <path d="M 65 45 Q 55 30 70 15" fill="none" stroke="#bda082" stroke-width="4" stroke-linecap="round"/>
+        <path d="M 85 45 Q 95 30 80 15" fill="none" stroke="#bda082" stroke-width="4" stroke-linecap="round"/>
+        <path d="M 30 85 L 20 85 M 120 85 L 130 85" fill="none" stroke="#4a2e15" stroke-width="6" stroke-linecap="round"/>
+        <path d="M 30 80 L 120 80 L 110 115 Q 75 125 40 115 Z" fill="#8a9a5b" stroke="#4a2e15" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M 25 80 Q 75 50 125 80 Z" fill="#d49a5b" stroke="#4a2e15" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M 68 62 L 82 62 L 80 52 L 70 52 Z" fill="#4a2e15"/>
+        <circle cx="75" cy="50" r="6" fill="#4a2e15"/>
+      </g>
+      <text x="110" y="55" font-family="'Fraunces', Georgia, serif" font-size="42" font-weight="bold" fill="#4a2e15">RasaRisa</text>
+      <text x="115" y="80" font-family="'Inter', Arial, sans-serif" font-size="16" fill="#604a36">makan enak, tanpa ribet</text>
+    </svg>
+  </a>
+  <div class="topbar-actions">
+    <button class="icon-btn">Pesanan Saya</button>
+    <button class="icon-btn cart-btn">Keranjang <span class="badge-cart">2</span></button>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="hero-text">
+    <div class="po-pill"><span class="dot"></span> Pre-order sedang dibuka</div>
+    <h1>Makanan rumahan, <span class="accent">diantar ke rumah.</span></h1>
+    <p class="lede">Pesan hari ini, kami masak fresh, antar sesuai jadwal yang kamu pilih. Tanpa repot masak, tanpa keluar rumah.</p>
+    <button class="hero-cta">Lihat Menu <span class="arrow">→</span></button>
+  </div>
+  <div class="hero-img">
+    <span class="tag">Masakan Ibu, 18 Okt</span>
+  </div>
+</section>
+
+<div class="po-bar">
+  <p class="po-bar-label">Pilih tanggal ready:</p>
+  <div class="po-chips">
+    <button class="po-chip active">
+      <span class="po-date">Sabtu, 18 Okt</span>
+      <span class="po-meta">Tutup Jumat, 23.59</span>
+    </button>
+    <button class="po-chip">
+      <span class="po-date">Senin, 20 Okt</span>
+      <span class="po-meta">Tutup Minggu, 23.59</span>
+    </button>
+    <button class="po-chip closed">
+      <span class="po-date">Rabu, 15 Okt</span>
+      <span class="po-meta">PO ditutup</span>
+    </button>
+  </div>
+</div>
+
+<section class="menu-section">
+  <div class="section-head">
+    <div>
+      <h2 class="section-title">Menu siap Sabtu, 18 Okt</h2>
+      <p class="section-sub">Pilih item, lanjut checkout. Bisa campur dari tanggal ready yang berbeda.</p>
+    </div>
+  </div>
+
+  <div class="menu-grid">
+    <div class="menu-card">
+      <div class="menu-card-img a"><span class="emoji">🍲</span></div>
+      <div class="menu-card-body">
+        <span class="ready-tag">🍳 Ready Sabtu</span>
+        <h3>Nasi Liwet Box</h3>
+        <p class="desc">Nasi liwet komplit dengan ayam suwir, telur balado, dan sambal terasi rumahan.</p>
+        <div class="menu-card-footer">
+          <span class="price">Rp 35.000</span>
+          <button class="add-btn">+ Tambah</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-card">
+      <div class="menu-card-img b"><span class="emoji">🍗</span></div>
+      <div class="menu-card-body">
+        <span class="ready-tag">🍳 Ready Sabtu</span>
+        <h3>Ayam Bakar Sambal Matah</h3>
+        <p class="desc">Ayam bakar kecap empuk, sambal matah segar, nasi hangat, dan lalapan.</p>
+        <div class="menu-card-footer">
+          <span class="price">Rp 42.000</span>
+          <button class="add-btn">+ Tambah</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-card">
+      <div class="menu-card-img c"><span class="emoji">🐟</span></div>
+      <div class="menu-card-body">
+        <span class="ready-tag">🍳 Ready Senin</span>
+        <h3>Ikan Asam Manis</h3>
+        <p class="desc">Ikan goreng garing, saus asam manis, sayuran, dan nasi putih.</p>
+        <div class="menu-card-footer">
+          <span class="price">Rp 45.000</span>
+          <button class="add-btn">+ Tambah</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-card">
+      <div class="menu-card-img d"><span class="emoji">🥤</span></div>
+      <div class="menu-card-body">
+        <span class="ready-tag">🍳 Ready Senin</span>
+        <h3>Es Cendol Durian</h3>
+        <p class="desc">Cendol dengan durian asli, santan kental, dan gula merah cair.</p>
+        <div class="menu-card-footer">
+          <span class="price">Rp 25.000</span>
+          <button class="add-btn">+ Tambah</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
