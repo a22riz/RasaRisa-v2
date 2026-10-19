@@ -84,6 +84,21 @@ export default async function TrackingPage({
     .slice(-1)[0];
   const showReuploadBanner = !!reuploadRequest && !order.receiptImage && !isExpired;
 
+  // Contextual note per current status
+  const stepNotes: Record<OrderStatus, { title: string; detail: React.ReactNode }> = {
+    WAITING_PAYMENT: order.receiptImage
+      ? { title: "Sedang diverifikasi admin", detail: "Bukti transfer sudah diunggah. Admin akan verifikasi dan konfirmasi pesananmu." }
+      : showReuploadBanner
+        ? { title: "Admin meminta unggah ulang bukti transfer", detail: <>Bukti transfer sebelumnya perlu diunggah ulang. Transfer sesuai total, lalu unggah bukti baru di bawah.</> }
+        : { title: "Sedang menunggu bukti transfer", detail: <>Unggah bukti transfer sebelum <strong>{formatDateTime(order.expiresAt)}</strong>. Kalau lewat, pesanan otomatis dibatalkan.</> },
+    PAYMENT_CONFIRMED: { title: "Pembayaran terverifikasi", detail: "Admin sudah konfirmasi pembayaranmu. Pesanan sedang disiapkan untuk diproses." },
+    PROCESSING: { title: "Pesanan sedang diproses", detail: "Makanan sedang dimasak fresh oleh tim dapur. Tunggu sampai siap untuk diambil/diantar." },
+    READY_FOR_DELIVERY: { title: "Pesanan siap", detail: order.fulfillment === "DELIVERY" ? "Pesanan siap dan sedang diantar ke alamatmu. Pastikan nomor WA aktif." : "Pesanan siap diambil. Datang ke lokasi kami sesuai jadwal ready." },
+    COMPLETED: { title: "Pesanan selesai", detail: "Terima kasih sudah pesan di RasaRisa. Sampai jumpa di pre-order berikutnya." },
+    EXPIRED: { title: "Pesanan kedaluwarsa", detail: "Pesanan dibatalkan karena bukti transfer tidak diunggah sebelum tenggat." },
+  };
+  const stepNote = stepNotes[order.status as OrderStatus];
+
   return (
     <div className="min-h-screen">
       <header className="rr-topbar rr-topbar-centered">
@@ -176,11 +191,7 @@ export default async function TrackingPage({
                   {isCurrent && !isExpired && (
                     <>
                       <p className="text-xs text-turmeric font-semibold">
-                        {order.receiptImage
-                          ? "Sedang diverifikasi admin"
-                          : showReuploadBanner
-                            ? "Admin meminta unggah ulang bukti transfer"
-                            : "Sedang menunggu bukti transfer"}
+                        {stepNote.title}
                       </p>
                       <div
                         className="text-[13px] text-ink-muted mt-1.5 px-3.5 py-2.5 rounded-lg"
@@ -189,9 +200,7 @@ export default async function TrackingPage({
                           borderLeft: "3px solid var(--color-turmeric)",
                         }}
                       >
-                        ⏰ Unggah bukti transfer sebelum{" "}
-                        <strong>{formatDateTime(order.expiresAt)}</strong>. Kalau lewat,
-                        pesanan otomatis dibatalkan.
+                        {stepNote.detail}
                       </div>
                     </>
                   )}
