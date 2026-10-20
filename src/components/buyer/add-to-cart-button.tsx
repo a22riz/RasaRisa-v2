@@ -6,9 +6,11 @@ import { addItem } from "@/app/actions/cart";
 export function AddToCartButton({
   productId,
   poBatchId,
+  productName,
 }: {
   productId: string;
   poBatchId: string;
+  productName: string;
 }) {
   const [isPending, startTransition] = useTransition();
   const [showAdded, setShowAdded] = useState(false);
@@ -16,11 +18,14 @@ export function AddToCartButton({
   function handleClick() {
     startTransition(async () => {
       await addItem(productId, poBatchId, 1);
-      // Brief "Ditambah" feedback so the buyer sees the add landed.
-      setShowAdded(true);
-      await new Promise((r) => setTimeout(r, 1200));
-      setShowAdded(false);
     });
+    // Toast event fires immediately (survives revalidation).
+    window.dispatchEvent(
+      new CustomEvent("rr-cart-added", { detail: { name: productName } }),
+    );
+    // Button feedback.
+    setShowAdded(true);
+    setTimeout(() => setShowAdded(false), 1500);
   }
 
   return (
@@ -35,7 +40,7 @@ export function AddToCartButton({
         background: showAdded ? "var(--color-leaf)" : undefined,
       }}
     >
-      {isPending ? "..." : showAdded ? "✓ Ditambah" : "+ Tambah"}
+      {isPending ? "..." : showAdded ? "✓" : "+ Tambah"}
     </button>
   );
 }

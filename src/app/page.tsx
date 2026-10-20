@@ -3,6 +3,7 @@ import { getCatalog } from "@/server/orders";
 import { getCart, cartItemCount } from "@/lib/cart";
 import { formatCurrency, formatPoLabel, formatDayMonth, formatWeekdayDayMonth, formatWeekdayTime } from "@/lib/format";
 import { AddToCartButton } from "@/components/buyer/add-to-cart-button";
+import { CartToast } from "@/components/buyer/cart-toast";
 import { Logo } from "@/components/logo";
 
 const FOOD_EMOJIS = ["🍲", "🍗", "🐟", "🥤", "🍛", "🥘", "🍜", "🧁"];
@@ -153,7 +154,7 @@ export default async function CatalogPage() {
                       )}
                       <div className="flex justify-between items-center">
                         <span className="font-bold text-lg">{formatCurrency(product.price)}</span>
-                        <AddToCartButton productId={product.id} poBatchId={batch.id} />
+                        <AddToCartButton productId={product.id} poBatchId={batch.id} productName={product.name} />
                       </div>
                     </div>
                   </article>
@@ -163,6 +164,7 @@ export default async function CatalogPage() {
           </section>
         ))
       )}
+      <CartToast />
     </div>
   );
 }

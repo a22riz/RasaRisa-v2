@@ -1,27 +1,9 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { adminLogout } from "@/app/actions/admin/auth";
 import { prisma } from "@/lib/prisma";
 import { Logo } from "@/components/logo";
-
-const navSections = [
-  {
-    section: "Utama",
-    items: [
-      { href: "/admin", label: "Dashboard", icon: "📊" },
-      { href: "/admin/orders", label: "Pesanan", icon: "📦", badge: true },
-      { href: "/admin/products", label: "Katalog Menu", icon: "🍽️" },
-      { href: "/admin/po", label: "Kelola PO", icon: "📅" },
-    ],
-  },
-  {
-    section: "Laporan",
-    items: [
-      { href: "/admin/reports", label: "Laporan Keuangan", icon: "💰" },
-    ],
-  },
-];
+import { AdminNav } from "@/components/admin/admin-nav";
 
 export default async function AdminLayout({
   children,
@@ -43,24 +25,7 @@ export default async function AdminLayout({
         <div className="rr-sidebar-logo">
           <Logo variant="light" />
         </div>
-        {navSections.map((sec) => (
-          <div key={sec.section}>
-            <div className="rr-nav-section">{sec.section}</div>
-            {sec.items.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`rr-nav-item ${item.href === "/admin" ? "active" : ""}`}
-              >
-                <span className="icon">{item.icon}</span>
-                {item.label}
-                {item.badge && verifyCount > 0 && (
-                  <span className="rr-nav-badge">{verifyCount}</span>
-                )}
-              </Link>
-            ))}
-          </div>
-        ))}
+        <AdminNav verifyCount={verifyCount} />
         <div className="rr-nav-section">Akun</div>
         <form action={adminLogout}>
           <button type="submit" className="rr-nav-item rr-nav-logout">

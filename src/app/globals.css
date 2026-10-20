@@ -64,6 +64,11 @@
   100% { transform: scale(1); }
 }
 
+@keyframes toastIn {
+  0% { transform: translateY(20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
 @keyframes ring {
   0%, 100% { box-shadow: 0 0 0 6px rgba(244, 162, 97, 0.18); }
   50% { box-shadow: 0 0 0 10px rgba(244, 162, 97, 0.08); }
@@ -350,7 +355,7 @@
   border-left: 3px solid transparent;
   font-family: inherit;
 }
-.rr-nav-item:hover { background: rgba(255, 255, 255, 0.05); }
+.rr-nav-item:hover { background: rgba(255, 255, 255, 0.1); }
 .rr-nav-item.active {
   background: rgba(230, 57, 70, 0.15);
   color: white;
