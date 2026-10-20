@@ -37,6 +37,15 @@ async function main() {
     },
   });
 
+  await prisma.setting.upsert({
+    where: { key: "admin_wa" },
+    update: {},
+    create: {
+      key: "admin_wa",
+      value: "081200000000",
+    },
+  });
+
   // Sample products
   const products = await Promise.all([
     prisma.product.create({

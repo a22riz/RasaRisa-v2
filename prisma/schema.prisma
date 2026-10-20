@@ -81,6 +81,7 @@ model Order {
 enum Fulfillment {
   PICKUP
   DELIVERY
+  COD_DELIVERY
 }
 
 enum OrderStatus {

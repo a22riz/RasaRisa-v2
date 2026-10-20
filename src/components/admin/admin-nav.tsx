@@ -19,6 +19,12 @@ const navSections = [
       { href: "/admin/reports", label: "Laporan Keuangan", icon: "💰" },
     ],
   },
+  {
+    section: "Pengaturan",
+    items: [
+      { href: "/admin/settings", label: "Pengaturan", icon: "⚙️" },
+    ],
+  },
 ];
 
 function isActive(pathname: string, href: string): boolean {

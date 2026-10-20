@@ -5,6 +5,7 @@ import { formatCurrency, formatPoLabel } from "@/lib/format";
 import { CheckoutForm } from "@/components/buyer/checkout-form";
 import { CartItemControls } from "@/components/buyer/cart-item-controls";
 import { Logo } from "@/components/logo";
+import { prisma } from "@/lib/prisma";
 
 const FOOD_EMOJIS = ["🍲", "🍗", "🐟", "🥤"];
 const IMG_CLASSES = ["rr-img-a", "rr-img-b", "rr-img-c", "rr-img-d"];
@@ -12,6 +13,11 @@ const IMG_CLASSES = ["rr-img-a", "rr-img-b", "rr-img-c", "rr-img-d"];
 export default async function CheckoutPage() {
   const [cart, batches] = await Promise.all([getCart(), getCatalog()]);
   const count = cartItemCount(cart);
+
+  const adminWaSetting = await prisma.setting.findUnique({
+    where: { key: "admin_wa" },
+  });
+  const adminWa = adminWaSetting?.value ?? "081200000000";
 
   const productMap = new Map<string, { name: string; price: number }>();
   const batchMap = new Map<string, string>();
@@ -136,7 +142,7 @@ export default async function CheckoutPage() {
                 ))}
               </div>
 
-              <CheckoutForm cart={cart} lines={lines} total={total} />
+              <CheckoutForm cart={cart} lines={lines} total={total} adminWa={adminWa} />
             </>
           )}
         </div>

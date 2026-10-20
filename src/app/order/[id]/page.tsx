@@ -178,7 +178,11 @@ export default async function OrderConfirmationPage({
           <h2>Ringkasan pesanan</h2>
           <p className="rr-card-sub">
             {order.orderNumber} · {order.buyerName} ·{" "}
-            {order.fulfillment === "DELIVERY" ? "Antar ke rumah" : "Ambil sendiri"}
+            {order.fulfillment === "DELIVERY"
+            ? "Antar ke rumah"
+            : order.fulfillment === "COD_DELIVERY"
+              ? "Antar Bayar di Tempat"
+              : "Ambil sendiri"}
           </p>
 
           <div className="rounded-xl p-4 mt-1" style={{ background: "var(--color-cream)" }}>

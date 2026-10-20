@@ -23,11 +23,13 @@ export const waSchema = z
 export const checkoutSchema = z.object({
   buyerName: z.string().min(1, "Nama pelanggan dan nomor WA wajib diisi"),
   buyerWa: waSchema,
-  fulfillment: z.enum(["PICKUP", "DELIVERY"]),
+  fulfillment: z.enum(["PICKUP", "DELIVERY", "COD_DELIVERY"]),
   address: z.string().optional(),
   items: z.array(cartItemSchema).min(1, "Keranjang kosong"),
 }).refine(
-  (data) => data.fulfillment !== "DELIVERY" || (data.address && data.address.length > 0),
+  (data) =>
+    (data.fulfillment !== "DELIVERY" && data.fulfillment !== "COD_DELIVERY") ||
+    (data.address && data.address.length > 0),
   { message: "Alamat wajib diisi untuk pengiriman" },
 );
 

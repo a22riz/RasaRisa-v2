@@ -47,6 +47,7 @@ export const ERRORS = {
 export const FULFILLMENT_LABELS = {
   PICKUP: "Ambil Sendiri",
   DELIVERY: "Antar",
+  COD_DELIVERY: "Antar Bayar di Tempat",
 } as const;
 
 // Fulfillment groups: one per PoBatch in an order. Tracks per-batch progress

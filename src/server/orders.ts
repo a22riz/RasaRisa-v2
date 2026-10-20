@@ -31,7 +31,7 @@ export async function createOrder(
   cart: Cart,
   buyerName: string,
   buyerWa: string,
-  fulfillment: "PICKUP" | "DELIVERY",
+  fulfillment: "PICKUP" | "DELIVERY" | "COD_DELIVERY",
   address?: string,
 ) {
   // Validate cart items against open PO batches
@@ -86,7 +86,7 @@ export async function createOrder(
       buyerName,
       buyerWa,
       fulfillment,
-      address: fulfillment === "DELIVERY" ? address : null,
+      address: fulfillment === "PICKUP" ? null : address,
       status: "WAITING_PAYMENT",
       expiresAt,
       totalAmount,

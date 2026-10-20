@@ -93,7 +93,7 @@ export default async function TrackingPage({
         : { title: "Sedang menunggu bukti transfer", detail: <>Unggah bukti transfer sebelum <strong>{formatDateTime(order.expiresAt)}</strong>. Kalau lewat, pesanan otomatis dibatalkan.</> },
     PAYMENT_CONFIRMED: { title: "Pembayaran terverifikasi", detail: "Admin sudah konfirmasi pembayaranmu. Pesanan sedang disiapkan untuk diproses." },
     PROCESSING: { title: "Pesanan sedang diproses", detail: "Makanan sedang dimasak fresh oleh tim dapur. Tunggu sampai siap untuk diambil/diantar." },
-    READY_FOR_DELIVERY: { title: "Pesanan siap", detail: order.fulfillment === "DELIVERY" ? "Pesanan siap dan sedang diantar ke alamatmu. Pastikan nomor WA aktif." : "Pesanan siap diambil. Datang ke lokasi kami sesuai jadwal ready." },
+    READY_FOR_DELIVERY: { title: "Pesanan siap", detail: order.fulfillment === "PICKUP" ? "Pesanan siap diambil. Datang ke lokasi kami sesuai jadwal ready." : "Pesanan siap dan sedang diantar ke alamatmu. Pastikan nomor WA aktif." },
     COMPLETED: { title: "Pesanan selesai", detail: "Terima kasih sudah pesan di RasaRisa. Sampai jumpa di pre-order berikutnya." },
     EXPIRED: { title: "Pesanan kedaluwarsa", detail: "Pesanan dibatalkan karena bukti transfer tidak diunggah sebelum tenggat." },
   };
@@ -292,10 +292,14 @@ export default async function TrackingPage({
 
           <div className="mt-4 pt-4 border-t border-soft-grey flex items-center gap-2.5 text-sm">
             <span className="text-lg">
-              {order.fulfillment === "DELIVERY" ? "🛵" : "🏪"}
+              {order.fulfillment === "PICKUP" ? "🏪" : "🛵"}
             </span>
             <span>
-              {order.fulfillment === "DELIVERY" ? "Antar ke rumah · Gratis" : "Ambil sendiri"}
+              {order.fulfillment === "PICKUP"
+                ? "Ambil sendiri"
+                : order.fulfillment === "COD_DELIVERY"
+                  ? "Antar Bayar di Tempat"
+                  : "Antar ke rumah · Gratis"}
             </span>
           </div>
 
