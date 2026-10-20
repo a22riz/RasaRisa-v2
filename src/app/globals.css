@@ -58,6 +58,12 @@
   100% { transform: scale(1); }
 }
 
+@keyframes btnPop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
 @keyframes ring {
   0%, 100% { box-shadow: 0 0 0 6px rgba(244, 162, 97, 0.18); }
   50% { box-shadow: 0 0 0 10px rgba(244, 162, 97, 0.08); }

@@ -19,7 +19,6 @@ export default async function CatalogPage() {
           <Logo />
         </Link>
         <div className="flex gap-2.5 items-center">
-          <button type="button" className="rr-icon-btn">Pesanan Saya</button>
           <Link href="/checkout" className="rr-icon-btn rr-cart-btn">
             Keranjang
             {count > 0 && <span className="rr-badge-cart">{count}</span>}
