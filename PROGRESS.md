@@ -1,7 +1,7 @@
 # PROGRESS.md — RasaRisa v2 Development
 
-> Last updated: 19 Oct 2026
-> Status: Multi-PO fulfillment per batch implemented + verified. Core complete, ready for Docker deploy + manual testing
+> Last updated: 20 Oct 2026
+> Status: Phase 13 (Settings) done. COD delivery option added. Core complete, ready for Docker deploy + manual testing
 
 ## Phase 0: Planning ✅ DONE
 
@@ -121,14 +121,15 @@
 - [x] Status breakdown
 - [x] Empty state: "Tidak ada data untuk periode ini"
 
-## Phase 13: Admin — Settings
+## Phase 13: Admin — Settings ✅ DONE
 
-- [ ] Settings page (`/admin/settings`)
-- [ ] Bank details (managed via seed/DB for now)
-- [ ] Receipt deadline (configurable via constants.ts)
-- [ ] Tracking expiry (configurable via constants.ts)
-- [ ] Change admin password
-- ponytail: Settings page deferred — bank details seeded, config in constants.ts
+- [x] Settings page (`/admin/settings`)
+- [x] Bank details (editable, stored in Setting table)
+- [x] Admin WhatsApp number (editable, stored in Setting table, used for COD delivery WA button)
+- [x] Delivery note (editable)
+- [x] Change admin password (verify current password, set new hash)
+- [x] Admin nav: Pengaturan section with settings link
+- ponytail: Receipt deadline + tracking expiry still in constants.ts (not user-editable)
 
 ## Phase 14: Polish + Docker ✅ MOSTLY DONE
 
