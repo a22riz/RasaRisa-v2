@@ -139,7 +139,7 @@ export default async function AdminReportsPage({
                   {topProducts.map((p, idx) => {
                     const pct = Math.round((p.revenue / maxRevenue) * 100);
                     return (
-                      <div key={idx}>
+                      <div key={p.name}>
                         <div className="flex justify-between text-sm mb-1">
                           <span className="font-medium text-ink">{p.name}</span>
                           <span className="text-ink-muted text-xs">{p.qty}x terjual</span>

@@ -137,14 +137,14 @@
 - [x] Accessibility: focus-visible outline, keyboard nav, semantic HTML
 - [x] Responsive (mobile-first, grid responsive)
 - [x] Type check pass (tsc --noEmit clean)
-- [x] Test suite pass (27/27 tests)
-- [x] Build compiles successfully
+- [x] Test suite pass (40 unit + 5 DB integration)
+- [x] Build compiles successfully (production build verified)
 - [x] Dockerfile multi-stage build
 - [x] docker-compose.yml (single service: app+postgres)
 - [x] docker-entrypoint.sh (init db + migrate + seed + start)
 - [x] Volume: DB data + uploads
-- [ ] `docker-compose up` tested from clean state
-- [ ] Lint pass (biome)
+- [ ] `docker-compose up` tested from clean state (blocked: Docker Desktop not running)
+- [x] Lint pass (biome, 0 errors)
 
 ## Phase 15: Verification
 
@@ -152,11 +152,11 @@
 - [x] Integration tests verify multi-PO flow end-to-end (createOrder → confirmPayment → advanceGroup × n → COMPLETED)
 - [x] Type check: clean
 - [x] Dev server compiles all routes (home, tracking, admin login) without errors
-- [ ] Build: production build (run before merge; was passing before multi-PO changes)
+- [x] Build: production build passes (all 17 routes compiled)
 - [ ] Manual click-through every screen (needs running DB)
 - [x] Error messages match AGENTS.md spec (in constants.ts)
 - [x] No external runtime calls (self-hosted fonts, local uploads, no API integrations)
-- [ ] Docker deploy test
+- [ ] Docker deploy test (blocked: Docker Desktop not running)
 
 ## Phase 16: Multi-PO Fulfillment per Batch ✅ DONE
 

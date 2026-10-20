@@ -16,7 +16,7 @@ export async function createProduct(formData: FormData) {
   const name = (formData.get("name") as string)?.trim();
   const description = (formData.get("description") as string)?.trim();
   const priceStr = formData.get("price") as string;
-  const price = priceStr ? Number.parseInt(priceStr, 10) : NaN;
+  const price = priceStr ? Number.parseInt(priceStr, 10) : Number.NaN;
 
   const parsed = productSchema.safeParse({
     name,
@@ -40,7 +40,7 @@ export async function updateProduct(id: string, formData: FormData) {
   const name = (formData.get("name") as string)?.trim();
   const description = (formData.get("description") as string)?.trim();
   const priceStr = formData.get("price") as string;
-  const price = priceStr ? Number.parseInt(priceStr, 10) : NaN;
+  const price = priceStr ? Number.parseInt(priceStr, 10) : Number.NaN;
 
   const parsed = productSchema.safeParse({
     name,

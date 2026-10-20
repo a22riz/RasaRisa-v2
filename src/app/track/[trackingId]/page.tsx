@@ -137,7 +137,7 @@ export default async function TrackingPage({
 
             return (
               <div
-                key={idx}
+                key={tl.label}
                 className="grid relative pb-7 last:pb-0"
                 style={{ gridTemplateColumns: "36px 1fr", gap: 16 }}
               >

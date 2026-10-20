@@ -56,7 +56,7 @@ export function CheckoutForm({
   function buildWaLink(): string {
     const waNumber = adminWa.replace(/^0/, "62").replace(/\D/g, "");
     const text = encodeURIComponent(
-      `Halo RasaRisa, saya mau tanya kurir dan biaya untuk antar bayar di tempat.`,
+      "Halo RasaRisa, saya mau tanya kurir dan biaya untuk antar bayar di tempat.",
     );
     return `https://wa.me/${waNumber}?text=${text}`;
   }
@@ -100,10 +100,11 @@ export function CheckoutForm({
 
         {needsAddress && (
           <div className="rr-field" style={{ marginBottom: 0 }}>
-            <label>
+            <label htmlFor="address">
               Alamat pengiriman <span className="req">*</span>
             </label>
             <textarea
+              id="address"
               rows={2}
               required
               value={address}
@@ -147,10 +148,11 @@ export function CheckoutForm({
 
         <div className="grid grid-cols-2 gap-3.5">
           <div className="rr-field" style={{ marginBottom: 0 }}>
-            <label>
+            <label htmlFor="buyerName">
               Nama <span className="req">*</span>
             </label>
             <input
+              id="buyerName"
               type="text"
               required
               value={buyerName}
@@ -159,10 +161,11 @@ export function CheckoutForm({
             />
           </div>
           <div className="rr-field" style={{ marginBottom: 0 }}>
-            <label>
+            <label htmlFor="buyerWa">
               Nomor WhatsApp <span className="req">*</span>
             </label>
             <input
+              id="buyerWa"
               type="tel"
               required
               value={buyerWa}

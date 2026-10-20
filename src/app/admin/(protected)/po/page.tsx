@@ -67,9 +67,9 @@ export default async function AdminPoPage() {
           </div>
 
           <div>
-            <label className="block text-[13px] font-semibold mb-2 text-ink">
+            <span className="block text-[13px] font-semibold mb-2 text-ink">
               Pilih Produk <span className="req">*</span>
-            </label>
+            </span>
             {products.length === 0 ? (
               <div className="rounded-lg p-4 text-center" style={{ background: "var(--color-cream)", border: "1px dashed var(--color-soft-grey)" }}>
                 <p className="text-sm text-ink-muted">

@@ -24,8 +24,8 @@ describe.skipIf(!RUN)("fulfillment flow (live DB)", () => {
 
   let satBatchId = "";
   let sunBatchId = "";
-  let satProduct: { id: string } | null = null;
-  let sunProduct: { id: string } | null = null;
+  let satProductId = "";
+  let sunProductId = "";
 
   beforeAll(async () => {
     const batches = await prisma.poBatch.findMany({
@@ -36,10 +36,12 @@ describe.skipIf(!RUN)("fulfillment flow (live DB)", () => {
     expect(batches.length).toBeGreaterThanOrEqual(2);
     satBatchId = batches[0].id;
     sunBatchId = batches[1].id;
-    satProduct = batches[0].poItems[0]?.product ?? null;
-    sunProduct = batches[1].poItems[0]?.product ?? null;
+    const satProduct = batches[0].poItems[0]?.product;
+    const sunProduct = batches[1].poItems[0]?.product;
     expect(satProduct).not.toBeNull();
     expect(sunProduct).not.toBeNull();
+    satProductId = satProduct.id;
+    sunProductId = sunProduct.id;
   });
 
   async function mkOrder(poBatchId: string, productId: string, qty = 1) {
@@ -66,7 +68,7 @@ describe.skipIf(!RUN)("fulfillment flow (live DB)", () => {
   }
 
   it("creates fulfillment groups on payment confirm", async () => {
-    const order = await mkOrder(satBatchId, satProduct!.id);
+    const order = await mkOrder(satBatchId, satProductId);
     await attachReceipt(order.id, "test-receipt.jpg");
 
     const r = await confirmPayment(order.id);
@@ -79,7 +81,7 @@ describe.skipIf(!RUN)("fulfillment flow (live DB)", () => {
   });
 
   it("rejects confirmPayment without receipt", async () => {
-    const order = await mkOrder(satBatchId, satProduct!.id);
+    const order = await mkOrder(satBatchId, satProductId);
     const r = await confirmPayment(order.id);
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error).toBe(ERRORS.NO_RECEIPT);
@@ -89,8 +91,8 @@ describe.skipIf(!RUN)("fulfillment flow (live DB)", () => {
     // Build a single order mixing items from both PO batches.
     const cart = {
       items: [
-        { productId: satProduct!.id, poBatchId: satBatchId, quantity: 2 },
-        { productId: sunProduct!.id, poBatchId: sunBatchId, quantity: 1 },
+        { productId: satProductId, poBatchId: satBatchId, quantity: 2 },
+        { productId: sunProductId, poBatchId: sunBatchId, quantity: 1 },
       ],
     };
     const { order } = await createOrder(cart, "Tester", "081234567890", "DELIVERY", "Jl. Test");
@@ -133,7 +135,7 @@ describe.skipIf(!RUN)("fulfillment flow (live DB)", () => {
   });
 
   it("single-PO: advances through PROCESSING -> READY -> COMPLETED", async () => {
-    const order = await mkOrder(satBatchId, satProduct!.id);
+    const order = await mkOrder(satBatchId, satProductId);
     await attachReceipt(order.id, "single-receipt.jpg");
     await confirmPayment(order.id);
 
@@ -151,7 +153,7 @@ describe.skipIf(!RUN)("fulfillment flow (live DB)", () => {
   });
 
   it("rejects advancing a group that is COMPLETED", async () => {
-    const order = await mkOrder(satBatchId, satProduct!.id);
+    const order = await mkOrder(satBatchId, satProductId);
     await attachReceipt(order.id, "term-receipt.jpg");
     await confirmPayment(order.id);
     await advanceGroup(order.id, satBatchId); // -> READY
