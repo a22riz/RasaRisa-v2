@@ -3,6 +3,7 @@ import { getCart, cartItemCount } from "@/lib/cart";
 import { getCatalog } from "@/server/orders";
 import { formatCurrency, formatPoLabel } from "@/lib/format";
 import { CheckoutForm } from "@/components/buyer/checkout-form";
+import { CartItemControls } from "@/components/buyer/cart-item-controls";
 import { Logo } from "@/components/logo";
 
 const FOOD_EMOJIS = ["🍲", "🍗", "🐟", "🥤"];
@@ -122,17 +123,12 @@ export default async function CheckoutPage() {
                             <h3 className="text-sm font-semibold">{item.productName}</h3>
                             <p className="text-xs text-ink-muted">{formatCurrency(item.price)}</p>
                           </div>
-                          <div className="rr-qty">
-                            <button type="button">−</button>
-                            <span>{item.quantity}</span>
-                            <button type="button">+</button>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-bold text-sm min-w-[70px]">
-                              {formatCurrency(item.price * item.quantity)}
-                            </div>
-                            <button className="text-ink-muted hover:text-danger text-base px-1" type="button">✕</button>
-                          </div>
+                          <CartItemControls
+                            productId={item.productId}
+                            poBatchId={item.poBatchId}
+                            quantity={item.quantity}
+                            price={item.price}
+                          />
                         </div>
                       );
                     })}
