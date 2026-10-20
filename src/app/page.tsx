@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getCatalog } from "@/server/orders";
 import { getCart, cartItemCount } from "@/lib/cart";
-import { formatCurrency, formatPoLabel, formatDateShort } from "@/lib/format";
+import { formatCurrency, formatPoLabel, formatDayMonth, formatWeekdayDayMonth, formatWeekdayTime } from "@/lib/format";
 import { AddToCartButton } from "@/components/buyer/add-to-cart-button";
 import { Logo } from "@/components/logo";
 
@@ -29,7 +29,7 @@ export default async function CatalogPage() {
 
       {/* Hero */}
       <section
-        className="max-w-[1120px] mx-auto px-6 py-14 grid items-center gap-10"
+        className="max-w-[1120px] mx-auto px-6 pt-14 pb-10 grid items-center gap-10"
         style={{ gridTemplateColumns: batches.length > 0 ? "1.1fr 1fr" : "1fr" }}
       >
         <div>
@@ -38,7 +38,7 @@ export default async function CatalogPage() {
               <span className="dot" /> Pre-order sedang dibuka
             </div>
           )}
-          <h1 className="font-serif font-bold text-4xl leading-tight mb-3.5">
+          <h1 className="font-serif font-bold leading-tight mb-3.5" style={{ fontSize: "2.75rem" }}>
             Makanan rumahan,{" "}
             <span className="text-tomato italic">diantar ke rumah.</span>
           </h1>
@@ -61,7 +61,7 @@ export default async function CatalogPage() {
             }}
           >
             <span className="absolute top-4 left-4 bg-white/90 text-ink px-3 py-1.5 rounded-full text-xs font-semibold">
-              Masakan Ibu, {formatDateShort(batches[0].readyDate)}
+              Masakan Ibu, {formatDayMonth(batches[0].readyDate)}
             </span>
             <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-9xl">
               🍜
@@ -75,26 +75,20 @@ export default async function CatalogPage() {
         <div className="max-w-[1120px] mx-auto px-6 pb-7">
           <p className="text-[13px] text-ink-muted mb-2.5 font-medium">Pilih tanggal ready:</p>
           <div className="flex gap-2.5 flex-wrap">
-            {batches.map((batch, idx) => {
-              const ready = new Date(batch.readyDate);
-              const weekday = new Intl.DateTimeFormat("id-ID", { weekday: "short" }).format(ready);
-              return (
-                <a
-                  key={batch.id}
-                  href={`#po-${batch.id}`}
-                  className={`rr-po-chip ${idx === 0 ? "active" : ""}`}
-                >
-                  <span className="rr-po-chip-date">
-                    <span className="day">{weekday}</span>
-                    <span className="num">{ready.getDate()}</span>
-                  </span>
-                  <span className="rr-po-chip-meta">
-                    <span className="title">Ready {weekday}, {ready.getDate()} Okt</span>
-                    <span className="sub">Tutup {formatDateShort(batch.closeDate)}</span>
-                  </span>
-                </a>
-              );
-            })}
+            {batches.map((batch, idx) => (
+              <a
+                key={batch.id}
+                href={`#po-${batch.id}`}
+                className={`rr-po-chip ${idx === 0 ? "active" : ""}`}
+              >
+                <span className="rr-po-chip-date">
+                  {formatWeekdayDayMonth(batch.readyDate)}
+                </span>
+                <span className="rr-po-chip-meta">
+                  Tutup {formatWeekdayTime(batch.closeDate)}
+                </span>
+              </a>
+            ))}
           </div>
         </div>
       )}
@@ -127,7 +121,7 @@ export default async function CatalogPage() {
             </div>
 
             <div
-              className="grid gap-5"
+              className="grid gap-[22px]"
               style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}
             >
               {batch.poItems.map(({ product }, idx) => {
@@ -136,7 +130,7 @@ export default async function CatalogPage() {
                 return (
                   <article
                     key={product.id}
-                    className="bg-card rounded-[14px] overflow-hidden border border-transparent transition-all"
+                    className="bg-card rounded-[14px] overflow-hidden border border-transparent transition-all hover:-translate-y-[3px] hover:border-tomato/20"
                     style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
                   >
                     <div
@@ -145,7 +139,7 @@ export default async function CatalogPage() {
                     >
                       <span className="text-4xl">{emoji}</span>
                     </div>
-                    <div className="p-4">
+                    <div className="px-[18px] pt-4 pb-[18px]">
                       <span
                         className="inline-flex items-center gap-1 text-[11px] font-semibold rounded-full mb-2.5"
                         style={{ color: "var(--color-turmeric)", background: "rgba(244,162,97,0.15)", padding: "3px 9px" }}
