@@ -20,7 +20,7 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div className="rr-field" style={{ marginBottom: 0 }}>
         <label htmlFor="email">Email</label>
         <input
@@ -48,7 +48,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="rr-btn-primary w-full justify-center"
+        className="rr-btn-primary w-full justify-center mt-2"
         style={{ borderRadius: 10, padding: 13, fontSize: 15, fontWeight: 700 }}
       >
         {isPending ? "Memproses..." : "Masuk"}
