@@ -1,11 +1,11 @@
-import Link from "next/link";
-import { getCart, cartItemCount } from "@/lib/cart";
-import { getCatalog } from "@/server/orders";
-import { formatCurrency, formatPoLabel } from "@/lib/format";
-import { CheckoutForm } from "@/components/buyer/checkout-form";
 import { CartItemControls } from "@/components/buyer/cart-item-controls";
+import { CheckoutForm } from "@/components/buyer/checkout-form";
 import { Logo } from "@/components/logo";
+import { cartItemCount, getCart } from "@/lib/cart";
+import { formatCurrency, formatPoLabel } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
+import { getCatalog } from "@/server/orders";
+import Link from "next/link";
 
 const FOOD_EMOJIS = ["🍲", "🍗", "🐟", "🥤"];
 const IMG_CLASSES = ["rr-img-a", "rr-img-b", "rr-img-c", "rr-img-d"];
@@ -61,12 +61,15 @@ export default async function CheckoutPage() {
         <Link href="/" className="rr-logo">
           <Logo />
         </Link>
-        <Link href="/" className="text-ink-muted text-sm font-medium inline-flex items-center gap-1.5 hover:text-tomato transition">
+        <Link
+          href="/"
+          className="text-ink-muted text-sm font-medium inline-flex items-center gap-1.5 hover:text-tomato transition"
+        >
           ← Kembali ke menu
         </Link>
       </header>
 
-      <div className="max-w-[1120px] mx-auto px-6 py-8 grid gap-8 items-start" style={{ gridTemplateColumns: "1.5fr 1fr" }}>
+      <div className="max-w-[1120px] mx-auto px-5 md:px-6 py-8 grid gap-8 items-start rr-checkout-grid">
         <div>
           <h1 className="font-serif font-bold text-3xl mb-1.5">Checkout</h1>
           <p className="text-ink-muted text-sm mb-7">
@@ -76,17 +79,23 @@ export default async function CheckoutPage() {
           {/* Steps */}
           <div className="flex gap-2 mb-7 items-center">
             <div className="flex items-center gap-2 text-[13px] font-semibold text-leaf">
-              <span className="w-[26px] h-[26px] rounded-full bg-leaf text-white border border-leaf flex items-center justify-center text-[13px] font-bold">✓</span>
+              <span className="w-[26px] h-[26px] rounded-full bg-leaf text-white border border-leaf flex items-center justify-center text-[13px] font-bold">
+                ✓
+              </span>
               Pilih Menu
             </div>
             <div className="flex-1 h-px bg-soft-grey min-w-5" />
             <div className="flex items-center gap-2 text-[13px] font-semibold text-ink">
-              <span className="w-[26px] h-[26px] rounded-full bg-tomato text-white border border-tomato flex items-center justify-center text-[13px] font-bold">2</span>
+              <span className="w-[26px] h-[26px] rounded-full bg-tomato text-white border border-tomato flex items-center justify-center text-[13px] font-bold">
+                2
+              </span>
               Checkout
             </div>
             <div className="flex-1 h-px bg-soft-grey min-w-5" />
             <div className="flex items-center gap-2 text-[13px] font-semibold text-ink-muted">
-              <span className="w-[26px] h-[26px] rounded-full bg-card border border-soft-grey flex items-center justify-center text-[13px] font-bold">3</span>
+              <span className="w-[26px] h-[26px] rounded-full bg-card border border-soft-grey flex items-center justify-center text-[13px] font-bold">
+                3
+              </span>
               Bayar
             </div>
           </div>
@@ -119,14 +128,17 @@ export default async function CheckoutPage() {
                       return (
                         <div
                           key={`${item.productId}-${item.poBatchId}`}
-                          className="grid gap-3.5 items-center py-3 border-b border-soft-grey last:border-0"
-                          style={{ gridTemplateColumns: "56px 1fr auto auto" }}
+                          className="grid gap-3.5 items-center py-3 border-b border-soft-grey last:border-0 rr-cart-item-grid"
                         >
-                          <div className={`${imgClass} w-14 h-14 rounded-[10px] flex items-center justify-center text-2xl`}>
+                          <div
+                            className={`${imgClass} w-14 h-14 rounded-[10px] flex items-center justify-center text-2xl`}
+                          >
                             {emoji}
                           </div>
                           <div>
-                            <h3 className="text-sm font-semibold">{item.productName}</h3>
+                            <h3 className="text-sm font-semibold rr-break-words">
+                              {item.productName}
+                            </h3>
                             <p className="text-xs text-ink-muted">{formatCurrency(item.price)}</p>
                           </div>
                           <CartItemControls
@@ -149,7 +161,7 @@ export default async function CheckoutPage() {
 
         {/* Summary */}
         {count > 0 && lines.length > 0 && (
-          <div className="sticky top-20">
+          <div className="rr-checkout-summary md:sticky md:top-20">
             <div className="rr-card" style={{ marginBottom: 0 }}>
               <h2 className="font-serif text-xl font-semibold mb-4">Ringkasan Pesanan</h2>
               <div className="flex justify-between text-sm py-1.5 text-ink-muted">
@@ -168,17 +180,9 @@ export default async function CheckoutPage() {
                 <span>Total</span>
                 <span className="text-tomato">{formatCurrency(total)}</span>
               </div>
-              <button
-                type="submit"
-                form="checkout-form"
-                className="rr-btn-primary w-full mt-4.5 justify-center"
-                style={{ borderRadius: 10, padding: 14, fontSize: 15, fontWeight: 700 }}
-              >
-                Buat Pesanan
-              </button>
               <p className="text-xs text-ink-muted mt-3 text-center leading-relaxed">
-                Dengan buat pesanan, kamu setuju transfer sesuai total di atas.
-                Detail rekening muncul setelah pesanan dibuat.
+                Dengan buat pesanan, kamu setuju transfer sesuai total di atas. Detail rekening
+                muncul setelah pesanan dibuat.
               </p>
             </div>
           </div>

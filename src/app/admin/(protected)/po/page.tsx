@@ -1,12 +1,10 @@
-import Link from "next/link";
-import { prisma } from "@/lib/prisma";
+import { closePoBatch, createPoBatch } from "@/app/actions/admin/po";
 import { formatDate, formatDateShort } from "@/lib/format";
-import { createPoBatch, closePoBatch } from "@/app/actions/admin/po";
+import { prisma } from "@/lib/prisma";
+import Link from "next/link";
 
-const weekdayShort = (d: Date) =>
-  new Intl.DateTimeFormat("id-ID", { weekday: "short" }).format(d);
-const monthShort = (d: Date) =>
-  new Intl.DateTimeFormat("id-ID", { month: "short" }).format(d);
+const weekdayShort = (d: Date) => new Intl.DateTimeFormat("id-ID", { weekday: "short" }).format(d);
+const monthShort = (d: Date) => new Intl.DateTimeFormat("id-ID", { month: "short" }).format(d);
 
 export default async function AdminPoPage() {
   const [batches, products] = await Promise.all([
@@ -39,29 +37,22 @@ export default async function AdminPoPage() {
         </p>
 
         <form action={createPoBatch} className="space-y-4">
-          <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
+          <div
+            className="grid gap-4"
+            style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}
+          >
             <div className="rr-field" style={{ marginBottom: 0 }}>
               <label htmlFor="readyDate">
                 Tanggal Siap <span className="req">*</span>
               </label>
-              <input
-                id="readyDate"
-                name="readyDate"
-                type="datetime-local"
-                required
-              />
+              <input id="readyDate" name="readyDate" type="datetime-local" required />
               <p className="hint">Kapan pesanan siap diambil/diantar.</p>
             </div>
             <div className="rr-field" style={{ marginBottom: 0 }}>
               <label htmlFor="closeDate">
                 Tutup PO <span className="req">*</span>
               </label>
-              <input
-                id="closeDate"
-                name="closeDate"
-                type="datetime-local"
-                required
-              />
+              <input id="closeDate" name="closeDate" type="datetime-local" required />
               <p className="hint">Pembeli gak bisa pesan setelah ini.</p>
             </div>
           </div>
@@ -71,7 +62,13 @@ export default async function AdminPoPage() {
               Pilih Produk <span className="req">*</span>
             </span>
             {products.length === 0 ? (
-              <div className="rounded-lg p-4 text-center" style={{ background: "var(--color-cream)", border: "1px dashed var(--color-soft-grey)" }}>
+              <div
+                className="rounded-lg p-4 text-center"
+                style={{
+                  background: "var(--color-cream)",
+                  border: "1px dashed var(--color-soft-grey)",
+                }}
+              >
                 <p className="text-sm text-ink-muted">
                   Belum ada produk aktif.{" "}
                   <Link href="/admin/products/new" className="text-tomato font-medium underline">
@@ -80,7 +77,10 @@ export default async function AdminPoPage() {
                 </p>
               </div>
             ) : (
-              <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}>
+              <div
+                className="grid gap-2"
+                style={{ gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}
+              >
                 {products.map((product) => (
                   <label
                     key={product.id}
@@ -110,7 +110,9 @@ export default async function AdminPoPage() {
       <div>
         <div className="flex justify-between items-center mb-4">
           <h2 className="font-serif text-xl font-semibold">Daftar PO</h2>
-          <span className="text-sm text-ink-muted">{batches.length} PO · {totalOrders} pesanan</span>
+          <span className="text-sm text-ink-muted">
+            {batches.length} PO · {totalOrders} pesanan
+          </span>
         </div>
 
         {batches.length === 0 ? (
@@ -125,17 +127,16 @@ export default async function AdminPoPage() {
               const close = new Date(batch.closeDate);
               const hoursLeft = Math.round((close.getTime() - Date.now()) / 3600000);
               const isOpen = batch.status === "OPEN";
-              const poStatus =
-                !isOpen
+              const poStatus = !isOpen
+                ? { class: "closed", label: "Selesai" }
+                : hoursLeft < 0
                   ? { class: "closed", label: "Selesai" }
-                  : hoursLeft < 0
-                    ? { class: "closed", label: "Selesai" }
-                    : hoursLeft < 6
-                      ? { class: "soon", label: `Tutup ${hoursLeft} jam` }
-                      : { class: "open", label: "Dibuka" };
+                  : hoursLeft < 6
+                    ? { class: "soon", label: `Tutup ${hoursLeft} jam` }
+                    : { class: "open", label: "Dibuka" };
               return (
                 <div key={batch.id} className="rr-card" style={{ marginBottom: 0 }}>
-                  <div className="grid items-center gap-4" style={{ gridTemplateColumns: "52px 1fr auto auto auto" }}>
+                  <div className="grid items-center rr-po-list-grid">
                     <div className="rr-po-date-badge">
                       <span className="day">{weekdayShort(ready)}</span>
                       <span className="num">{ready.getDate()}</span>
@@ -145,23 +146,33 @@ export default async function AdminPoPage() {
                         PO {weekdayShort(ready)}, {ready.getDate()} {monthShort(ready)}
                       </div>
                       <div className="text-[13px] text-ink-muted">
-                        Tutup {formatDateShort(close)} · {batch.orderItems.length} pesanan · {batch.poItems.length} item
+                        Tutup {formatDateShort(close)} · {batch.orderItems.length} pesanan ·{" "}
+                        {batch.poItems.length} item
                       </div>
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {batch.poItems.map(({ product }) => (
-                          <span key={product.id} className="text-[11px] bg-cream text-ink-muted px-2 py-0.5 rounded-full">
+                          <span
+                            key={product.id}
+                            className="text-[11px] bg-cream text-ink-muted px-2 py-0.5 rounded-full"
+                          >
                             {product.name}
                           </span>
                         ))}
                       </div>
                     </div>
-                    <span className={`rr-po-status ${poStatus.class}`}>{poStatus.label}</span>
-                    <Link href="/admin/orders" className="rr-action-btn">Lihat pesanan</Link>
-                    {isOpen && (
-                      <form action={closePoBatch.bind(null, batch.id)}>
-                        <button type="submit" className="rr-action-btn">Tutup PO</button>
-                      </form>
-                    )}
+                    <div className="rr-grid-actions">
+                      <span className={`rr-po-status ${poStatus.class}`}>{poStatus.label}</span>
+                      <Link href="/admin/orders" className="rr-action-btn">
+                        Lihat pesanan
+                      </Link>
+                      {isOpen && (
+                        <form action={closePoBatch.bind(null, batch.id)}>
+                          <button type="submit" className="rr-action-btn">
+                            Tutup PO
+                          </button>
+                        </form>
+                      )}
+                    </div>
                   </div>
                 </div>
               );

@@ -2,22 +2,29 @@
 
 import { useState } from "react";
 
-export function CopyButton({ value }: { value: string }) {
+export function CopyButton({
+  value,
+  path,
+  label = "📋 Salin nomor rekening",
+  className = "rr-btn-ghost mt-3.5 text-[13px]",
+}: {
+  value?: string;
+  path?: string;
+  label?: string;
+  className?: string;
+}) {
   const [copied, setCopied] = useState(false);
 
   function handleCopy() {
-    navigator.clipboard?.writeText(value);
+    const text = path ? `${window.location.origin}${path}` : (value ?? "");
+    navigator.clipboard?.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
 
   return (
-    <button
-      type="button"
-      onClick={handleCopy}
-      className="mt-3.5 rr-btn-ghost text-[13px]"
-    >
-      {copied ? "✓ Disalin" : "📋 Salin nomor rekening"}
+    <button type="button" onClick={handleCopy} className={className}>
+      {copied ? "✓ Disalin" : label}
     </button>
   );
 }

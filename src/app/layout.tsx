@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   title: "RasaRisa",
   description: "Makan enak, tanpa ribet.",
   icons: {
-    icon: "/RasaRisa_Favicon.svg",
+    icon: "/favicon.svg",
   },
 };
 

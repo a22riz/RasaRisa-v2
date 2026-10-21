@@ -1,6 +1,6 @@
-import { prisma } from "@/lib/prisma";
+import { type OrderStatus, STATUS_LABELS } from "@/lib/constants";
 import { formatCurrency, formatDateShort } from "@/lib/format";
-import { STATUS_LABELS, type OrderStatus } from "@/lib/constants";
+import { prisma } from "@/lib/prisma";
 import { autoExpireOrders } from "@/server/orders";
 
 const STATUS_BADGE_CLASS: Record<OrderStatus, string> = {
@@ -35,7 +35,8 @@ export default async function AdminReportsPage({
   const completedOrders = orders.filter((o) => o.status === "COMPLETED");
   const totalRevenue = completedOrders.reduce((sum, o) => sum + o.totalAmount, 0);
   const totalOrders = orders.length;
-  const avgOrderValue = completedOrders.length > 0 ? Math.round(totalRevenue / completedOrders.length) : 0;
+  const avgOrderValue =
+    completedOrders.length > 0 ? Math.round(totalRevenue / completedOrders.length) : 0;
 
   // Product performance
   const productStats = new Map<string, { name: string; qty: number; revenue: number }>();
@@ -53,9 +54,7 @@ export default async function AdminReportsPage({
     }
   }
 
-  const topProducts = [...productStats.values()]
-    .sort((a, b) => b.revenue - a.revenue)
-    .slice(0, 10);
+  const topProducts = [...productStats.values()].sort((a, b) => b.revenue - a.revenue).slice(0, 10);
   const maxRevenue = topProducts.length > 0 ? topProducts[0].revenue : 1;
 
   // Status breakdown
@@ -63,7 +62,7 @@ export default async function AdminReportsPage({
   for (const order of orders) {
     statusBreakdown.set(
       order.status as OrderStatus,
-      (statusBreakdown.get(order.status as OrderStatus) ?? 0) + 1,
+      (statusBreakdown.get(order.status as OrderStatus) ?? 0) + 1
     );
   }
 
@@ -92,7 +91,7 @@ export default async function AdminReportsPage({
             name="from"
             type="date"
             defaultValue={fromDate.toISOString().slice(0, 10)}
-            style={{ width: "auto" }}
+            className="w-full sm:w-auto"
           />
         </div>
         <div className="rr-field" style={{ marginBottom: 0 }}>
@@ -102,10 +101,12 @@ export default async function AdminReportsPage({
             name="to"
             type="date"
             defaultValue={toDate.toISOString().slice(0, 10)}
-            style={{ width: "auto" }}
+            className="w-full sm:w-auto"
           />
         </div>
-        <button type="submit" className="rr-btn-primary">Filter</button>
+        <button type="submit" className="rr-btn-primary">
+          Filter
+        </button>
       </form>
 
       {totalOrders === 0 ? (
@@ -116,7 +117,10 @@ export default async function AdminReportsPage({
       ) : (
         <>
           {/* Stats */}
-          <div className="grid gap-4 mb-6" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}>
+          <div
+            className="grid gap-4 mb-6"
+            style={{ gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}
+          >
             {stats.map((stat) => (
               <div key={stat.label} className="rr-stat-card">
                 <div className="stat-icon">{stat.icon}</div>
@@ -126,7 +130,7 @@ export default async function AdminReportsPage({
             ))}
           </div>
 
-          <div className="grid gap-6" style={{ gridTemplateColumns: "1fr 1fr" }}>
+          <div className="grid rr-reports-grid">
             {/* Product performance bar chart */}
             <div className="rr-card" style={{ marginBottom: 0 }}>
               <h2 className="font-serif text-lg font-semibold mb-4">🏆 Produk Terlaris</h2>
@@ -145,14 +149,18 @@ export default async function AdminReportsPage({
                           <span className="text-ink-muted text-xs">{p.qty}x terjual</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="flex-1 h-7 rounded-md overflow-hidden" style={{ background: "var(--color-cream)" }}>
+                          <div
+                            className="flex-1 h-7 rounded-md overflow-hidden"
+                            style={{ background: "var(--color-cream)" }}
+                          >
                             <div
                               className="h-full rounded-md flex items-center justify-end pr-2"
                               style={{
                                 width: `${Math.max(pct, 8)}%`,
-                                background: idx === 0
-                                  ? "linear-gradient(90deg, var(--color-tomato), var(--color-turmeric))"
-                                  : "linear-gradient(90deg, var(--color-turmeric), var(--color-leaf))",
+                                background:
+                                  idx === 0
+                                    ? "linear-gradient(90deg, var(--color-tomato), var(--color-turmeric))"
+                                    : "linear-gradient(90deg, var(--color-turmeric), var(--color-leaf))",
                                 transition: "width 0.3s",
                               }}
                             >
@@ -179,14 +187,30 @@ export default async function AdminReportsPage({
                     <div key={status}>
                       <div className="flex justify-between text-sm mb-1">
                         <div className="flex items-center gap-2">
-                          <span className={`rr-status-badge ${STATUS_BADGE_CLASS[status]}`} style={{ padding: "2px 8px", fontSize: 11 }}>
-                            <span className="dot" style={{ width: 5, height: 5, borderRadius: "50%", background: "currentColor" }} />
+                          <span
+                            className={`rr-status-badge ${STATUS_BADGE_CLASS[status]}`}
+                            style={{ padding: "2px 8px", fontSize: 11 }}
+                          >
+                            <span
+                              className="dot"
+                              style={{
+                                width: 5,
+                                height: 5,
+                                borderRadius: "50%",
+                                background: "currentColor",
+                              }}
+                            />
                             {STATUS_LABELS[status]}
                           </span>
                         </div>
-                        <span className="text-ink-muted text-xs">{count} ({pct}%)</span>
+                        <span className="text-ink-muted text-xs">
+                          {count} ({pct}%)
+                        </span>
                       </div>
-                      <div className="h-2 rounded-full overflow-hidden" style={{ background: "var(--color-cream)" }}>
+                      <div
+                        className="h-2 rounded-full overflow-hidden"
+                        style={{ background: "var(--color-cream)" }}
+                      >
                         <div
                           className="h-full rounded-full"
                           style={{ width: `${pct}%`, background: "var(--color-tomato)" }}
@@ -208,21 +232,46 @@ export default async function AdminReportsPage({
               <table className="w-full border-collapse">
                 <thead>
                   <tr>
-                    <th className="text-left p-3 px-4 text-xs font-semibold text-ink-muted uppercase tracking-wide border-b border-soft-grey bg-cream">Pesanan</th>
-                    <th className="text-left p-3 px-4 text-xs font-semibold text-ink-muted uppercase tracking-wide border-b border-soft-grey bg-cream hide-mobile">Customer</th>
-                    <th className="text-left p-3 px-4 text-xs font-semibold text-ink-muted uppercase tracking-wide border-b border-soft-grey bg-cream">Total</th>
-                    <th className="text-left p-3 px-4 text-xs font-semibold text-ink-muted uppercase tracking-wide border-b border-soft-grey bg-cream">Status</th>
+                    <th className="text-left p-3 px-4 text-xs font-semibold text-ink-muted uppercase tracking-wide border-b border-soft-grey bg-cream">
+                      Pesanan
+                    </th>
+                    <th className="text-left p-3 px-4 text-xs font-semibold text-ink-muted uppercase tracking-wide border-b border-soft-grey bg-cream hide-mobile">
+                      Customer
+                    </th>
+                    <th className="text-left p-3 px-4 text-xs font-semibold text-ink-muted uppercase tracking-wide border-b border-soft-grey bg-cream">
+                      Total
+                    </th>
+                    <th className="text-left p-3 px-4 text-xs font-semibold text-ink-muted uppercase tracking-wide border-b border-soft-grey bg-cream">
+                      Status
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {orders.map((order) => (
                     <tr key={order.id} className="hover:bg-turmeric/5">
-                      <td className="p-3.5 px-4 text-sm font-semibold text-tomato border-b border-soft-grey">{order.orderNumber}</td>
-                      <td className="p-3.5 px-4 text-sm border-b border-soft-grey hide-mobile">{order.buyerName}</td>
-                      <td className="p-3.5 px-4 text-sm font-medium border-b border-soft-grey">{formatCurrency(order.totalAmount)}</td>
+                      <td className="p-3.5 px-4 text-sm font-semibold text-tomato border-b border-soft-grey">
+                        {order.orderNumber}
+                      </td>
+                      <td className="p-3.5 px-4 text-sm border-b border-soft-grey hide-mobile">
+                        {order.buyerName}
+                      </td>
+                      <td className="p-3.5 px-4 text-sm font-medium border-b border-soft-grey">
+                        {formatCurrency(order.totalAmount)}
+                      </td>
                       <td className="p-3.5 px-4 border-b border-soft-grey">
-                        <span className={`rr-status-badge ${STATUS_BADGE_CLASS[order.status as OrderStatus]}`} style={{ padding: "4px 10px", fontSize: 12 }}>
-                          <span className="dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "currentColor" }} />
+                        <span
+                          className={`rr-status-badge ${STATUS_BADGE_CLASS[order.status as OrderStatus]}`}
+                          style={{ padding: "4px 10px", fontSize: 12 }}
+                        >
+                          <span
+                            className="dot"
+                            style={{
+                              width: 6,
+                              height: 6,
+                              borderRadius: "50%",
+                              background: "currentColor",
+                            }}
+                          />
                           {STATUS_LABELS[order.status as OrderStatus]}
                         </span>
                       </td>

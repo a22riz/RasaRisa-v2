@@ -1,9 +1,15 @@
+import { OrderActions } from "@/components/admin/order-actions";
+import {
+  FULFILLMENT_GROUP_LABELS,
+  FULFILLMENT_LABELS,
+  type FulfillmentGroupStatus,
+  type OrderStatus,
+  STATUS_LABELS,
+} from "@/lib/constants";
+import { formatCurrency, formatDateTime, formatPoLabel } from "@/lib/format";
+import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
-import { formatCurrency, formatDateTime, formatPoLabel } from "@/lib/format";
-import { STATUS_LABELS, FULFILLMENT_LABELS, FULFILLMENT_GROUP_LABELS, type OrderStatus, type FulfillmentGroupStatus } from "@/lib/constants";
-import { OrderActions } from "@/components/admin/order-actions";
 
 const STATUS_BADGE_CLASS: Record<OrderStatus, string> = {
   WAITING_PAYMENT: "rr-status-waiting",
@@ -85,16 +91,22 @@ export default async function AdminOrderDetailPage({
         ← Kembali ke Pesanan
       </Link>
 
-      <div className="rr-order-detail-grid grid gap-6 items-start" style={{ gridTemplateColumns: "1fr 320px" }}>
+      <div
+        className="rr-order-detail-grid grid gap-6 items-start"
+        style={{ gridTemplateColumns: "1fr 320px" }}
+      >
         <div className="space-y-5 min-w-0">
           {/* Order header */}
           <div className="rr-card" style={{ marginBottom: 0 }}>
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h1 className="font-serif text-2xl font-bold text-ink">
-                {order.orderNumber}
-              </h1>
-              <span className={`rr-status-badge ${STATUS_BADGE_CLASS[order.status as OrderStatus]}`}>
-                <span className="dot" style={{ width: 8, height: 8, borderRadius: "50%", background: "currentColor" }} />
+              <h1 className="font-serif text-2xl font-bold text-ink">{order.orderNumber}</h1>
+              <span
+                className={`rr-status-badge ${STATUS_BADGE_CLASS[order.status as OrderStatus]}`}
+              >
+                <span
+                  className="dot"
+                  style={{ width: 8, height: 8, borderRadius: "50%", background: "currentColor" }}
+                />
                 {STATUS_LABELS[order.status as OrderStatus]}
               </span>
             </div>
@@ -108,7 +120,7 @@ export default async function AdminOrderDetailPage({
           {!isExpired && (
             <div className="rr-card" style={{ marginBottom: 0 }}>
               <h2 className="font-serif text-lg font-semibold mb-4">Progress Pesanan</h2>
-              <div className="flex items-center">
+              <div className="flex items-center rr-timeline-scroll">
                 {TIMELINE.map((tl, idx) => {
                   const isDone = idx <= currentStep;
                   const isCurrent = idx === currentStep;
@@ -137,7 +149,8 @@ export default async function AdminOrderDetailPage({
                         <div
                           className="h-0.5 flex-1 mx-1 mb-5"
                           style={{
-                            background: idx < currentStep ? "var(--color-leaf)" : "var(--color-soft-grey)",
+                            background:
+                              idx < currentStep ? "var(--color-leaf)" : "var(--color-soft-grey)",
                           }}
                         />
                       )}
@@ -153,26 +166,35 @@ export default async function AdminOrderDetailPage({
             <h2 className="font-serif text-lg font-semibold mb-4">Item Pesanan</h2>
             <div className="rounded-xl p-4" style={{ background: "var(--color-cream)" }}>
               {[...groups.entries()].map(([label, items], groupIdx) => (
-                <div key={label} className={groupIdx > 0 ? "mt-4 pt-4 border-t border-soft-grey" : ""}>
+                <div
+                  key={label}
+                  className={groupIdx > 0 ? "mt-4 pt-4 border-t border-soft-grey" : ""}
+                >
                   <div className="rr-ready-group-head">
                     <span className="dot" /> Ready {label}
                     {groupStatusByLabel.has(label) && (
                       <span
                         className="ml-auto text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
                         style={{
-                          background: groupStatusByLabel.get(label) === "COMPLETED"
-                            ? "rgba(56,142,60,0.12)"
-                            : groupStatusByLabel.get(label) === "READY_FOR_DELIVERY"
-                              ? "rgba(244,162,97,0.15)"
-                              : "var(--color-cream)",
-                          color: groupStatusByLabel.get(label) === "COMPLETED"
-                            ? "var(--color-leaf)"
-                            : groupStatusByLabel.get(label) === "READY_FOR_DELIVERY"
-                              ? "var(--color-turmeric)"
-                              : "var(--color-ink-muted)",
+                          background:
+                            groupStatusByLabel.get(label) === "COMPLETED"
+                              ? "rgba(56,142,60,0.12)"
+                              : groupStatusByLabel.get(label) === "READY_FOR_DELIVERY"
+                                ? "rgba(244,162,97,0.15)"
+                                : "var(--color-cream)",
+                          color:
+                            groupStatusByLabel.get(label) === "COMPLETED"
+                              ? "var(--color-leaf)"
+                              : groupStatusByLabel.get(label) === "READY_FOR_DELIVERY"
+                                ? "var(--color-turmeric)"
+                                : "var(--color-ink-muted)",
                         }}
                       >
-                        {FULFILLMENT_GROUP_LABELS[groupStatusByLabel.get(label) as FulfillmentGroupStatus]}
+                        {
+                          FULFILLMENT_GROUP_LABELS[
+                            groupStatusByLabel.get(label) as FulfillmentGroupStatus
+                          ]
+                        }
                       </span>
                     )}
                   </div>
@@ -184,10 +206,14 @@ export default async function AdminOrderDetailPage({
                           <span className="text-lg">{emoji}</span>
                           <div>
                             <p className="text-sm font-medium text-ink">{item.product.name}</p>
-                            <p className="text-xs text-ink-muted">{item.quantity}x {formatCurrency(item.price)}</p>
+                            <p className="text-xs text-ink-muted">
+                              {item.quantity}x {formatCurrency(item.price)}
+                            </p>
                           </div>
                         </div>
-                        <p className="text-sm font-medium text-ink">{formatCurrency(item.price * item.quantity)}</p>
+                        <p className="text-sm font-medium text-ink">
+                          {formatCurrency(item.price * item.quantity)}
+                        </p>
                       </div>
                     );
                   })}
@@ -195,7 +221,9 @@ export default async function AdminOrderDetailPage({
               ))}
               <div className="flex justify-between pt-3 mt-2 border-t-2 border-soft-grey">
                 <span className="font-serif text-base font-bold">Total</span>
-                <span className="font-serif text-xl font-bold text-tomato">{formatCurrency(order.totalAmount)}</span>
+                <span className="font-serif text-xl font-bold text-tomato">
+                  {formatCurrency(order.totalAmount)}
+                </span>
               </div>
             </div>
           </div>
@@ -219,7 +247,9 @@ export default async function AdminOrderDetailPage({
               {order.address && (
                 <div className="flex justify-between gap-4">
                   <dt className="shrink-0 text-ink-muted">Alamat</dt>
-                  <dd className="text-right font-medium text-ink">{order.address}</dd>
+                  <dd className="text-right font-medium text-ink min-w-0 rr-break-words">
+                    {order.address}
+                  </dd>
                 </div>
               )}
             </dl>
@@ -243,7 +273,13 @@ export default async function AdminOrderDetailPage({
           ) : (
             <div className="rr-card" style={{ marginBottom: 0 }}>
               <h2 className="font-serif text-lg font-semibold mb-2">🧾 Bukti Transfer</h2>
-              <div className="rounded-lg p-4 text-center" style={{ background: "var(--color-cream)", border: "1px dashed var(--color-soft-grey)" }}>
+              <div
+                className="rounded-lg p-4 text-center"
+                style={{
+                  background: "var(--color-cream)",
+                  border: "1px dashed var(--color-soft-grey)",
+                }}
+              >
                 <p className="text-sm text-ink-muted">Menunggu bukti transfer dari pembeli</p>
               </div>
             </div>
@@ -254,7 +290,10 @@ export default async function AdminOrderDetailPage({
             <h2 className="font-serif text-lg font-semibold mb-3">Riwayat Status</h2>
             <div className="space-y-2">
               {order.statusHistory.map((h) => (
-                <div key={h.id} className="flex items-baseline justify-between border-b border-soft-grey pb-2 last:border-0">
+                <div
+                  key={h.id}
+                  className="flex items-baseline justify-between border-b border-soft-grey pb-2 last:border-0"
+                >
                   <div>
                     <p className="text-sm font-medium text-ink">
                       {STATUS_LABELS[h.status as OrderStatus]}
@@ -269,7 +308,7 @@ export default async function AdminOrderDetailPage({
         </div>
 
         {/* Actions sidebar */}
-        <div className="sticky top-8">
+        <div className="md:sticky md:top-8">
           <div className="rr-card" style={{ marginBottom: 0 }}>
             <h2 className="font-serif text-lg font-semibold mb-3">Aksi Pesanan</h2>
             <OrderActions

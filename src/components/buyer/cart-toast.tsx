@@ -29,7 +29,7 @@ export function CartToast() {
 
   return (
     <div
-      className="fixed left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 items-center"
+      className="fixed left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 items-center max-w-[calc(100vw-2rem)]"
       style={{ bottom: 24, pointerEvents: "none" }}
     >
       {items.map((item) => (
