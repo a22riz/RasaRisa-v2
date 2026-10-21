@@ -1,7 +1,7 @@
 # ARCHITECTURE.md — RasaRisa v2 Code Structure
 
-> Last updated: 19 Oct 2026
-> Status: Pre-implementation (structure planned)
+> Last updated: 21 Oct 2026
+> Status: Core complete + UX polish (checkout flow, tracking hero, receipt serving)
 
 ## Overview
 
@@ -137,7 +137,9 @@ No background job, no cron, no scheduler. Simplest approach for single-container
 ponytail: if volume grows, add cron job or DB scheduled trigger. Ceiling: thousands of POs.
 
 ### 4. Receipt + product images in local volume
-Files stored at `/app/uploads/` (Docker volume). Served via Next.js route with content-type validation.
+Files stored at `/app/uploads/` (Docker volume). Served via Next.js API route
+`/api/uploads/[filename]` with admin-only auth (getSession check). Content-type
+from file extension. Path traversal protected via `path.basename`.
 No S3, no CDN, no external storage. Server-side MIME + size validation on upload.
 
 ### 5. Tracking link: unguessable token, no personal data
@@ -152,7 +154,20 @@ No JWT, no OAuth, no 2FA. Simplest secure approach.
 Fraunces + Inter font files in `public/fonts/`. `@font-face` in globals.css. No `<link>` to Google Fonts.
 Reason: zero external runtime calls constraint.
 
-### 8. Multi-PO fulfillment per batch (FulfillmentGroup)
+### 8. Checkout 2-step flow (Opsi Pengiriman → Checkout)
+Checkout page is split into two visually separated cards on one page:
+- **Step 1 (Opsi Pengiriman)**: fulfillment toggle (Antar ke Rumah / Ambil Sendiri).
+  For delivery: buyer fills name + WA + address, then clicks "Hubungi Admin via WA"
+  which opens WhatsApp with a pre-filled message containing buyer info, address,
+  cart items, and total. Admin checks delivery area + cost. Buyer then proceeds to step 2.
+- **Step 2 (Checkout)**: for delivery, a checkbox "sudah konfirmasi ongkir dengan admin"
+  enables the submit button. For pickup, buyer fills name + WA, then submits.
+COD_DELIVERY enum kept in schema/validation for existing orders, removed from checkout UI.
+
+Reason: delivery cost depends on distance, which admin must check manually. Having
+buyer contact admin before placing order avoids post-order delivery disputes.
+
+### 9. Multi-PO fulfillment per batch (FulfillmentGroup)
 One order can mix items from several PO batches (different ready dates). After
 payment is confirmed, one `FulfillmentGroup` is created per distinct PoBatch in
 the order. Each group advances independently: PROCESSING → READY_FOR_DELIVERY →
@@ -177,22 +192,29 @@ Ceiling: business model change (today all batches share one transfer).
 
 ### Buyer checkout flow
 ```
-Catalog (read open POs) → Add to cart (cookie) → Checkout (read cart cookie)
-→ Submit form → Validate → Create Order + OrderItems (DB) → Clear cart cookie
+Catalog (read open POs) → Add to cart (cookie) → Checkout page
+→ Step 1: Opsi Pengiriman (fulfillment toggle)
+  → Delivery: fill name + WA + address → Hubungi Admin via WA (auto-filled msg with cart items + total)
+  → Pickup: proceed to step 2
+→ Step 2: Checkout (data pemesan + place order)
+  → Delivery: checkbox "sudah konfirmasi ongkir" → place order
+  → Pickup: fill name + WA → place order
+→ Validate → Create Order + OrderItems (DB) → Clear cart cookie
 → Redirect to /order/[id] (confirmation)
 → Upload receipt (file → /app/uploads, path saved to Order)
-→ Buyer gets tracking link
+→ Buyer gets tracking link (with copy button)
 ```
 
 ### Admin verify flow
 ```
 Admin login → Dashboard (see "Perlu verifikasi" count) → Orders list (filter)
-→ Order detail → View receipt image → Click "Konfirmasi Pembayaran"
+→ Order detail → View receipt image (served via /api/uploads/[filename], admin-only)
+→ Click "Konfirmasi Pembayaran"
 → Status: WAITING_PAYMENT → PAYMENT_CONFIRMED + create FulfillmentGroup
   per PoBatch (all PROCESSING)
 → Admin advances each batch independently: PROCESSING → READY → COMPLETED
 → Order status auto-derives as least-advanced group (COMPLETED when all done)
-→ Buyer tracking page updates on next refresh (per-batch mini-timelines)
+→ Buyer tracking page updates on next refresh (status hero + per-batch mini-timelines)
 ```
 
 ### Order auto-expire

@@ -1,7 +1,7 @@
 # PROGRESS.md — RasaRisa v2 Development
 
-> Last updated: 20 Oct 2026
-> Status: Phase 13 (Settings) done. COD delivery option added. Core complete, ready for Docker deploy + manual testing
+> Last updated: 21 Oct 2026
+> Status: Core complete + UX polish (checkout flow, tracking hero, receipt serving). Ready for Docker deploy + manual testing
 
 ## Phase 0: Planning ✅ DONE
 
@@ -69,7 +69,10 @@
 
 - [x] Checkout page (`/checkout`)
 - [x] Cart items with product details + prices
-- [x] Fulfillment toggle (delivery/pickup)
+- [x] Fulfillment toggle (delivery/pickup, COD_DELIVERY removed from UI)
+- [x] 2-step flow: Opsi Pengiriman → Checkout (visually separated, same page)
+- [x] Delivery: fill name + WA + address first → WA admin contact (auto-filled message with cart items + total) → confirm checkbox → place order
+- [x] Pickup: fill name + WA → place order
 - [x] Buyer data form (name*, WA*)
 - [x] Cart persist via cookie
 - [x] Validation: name, WA format, PO window still open
@@ -82,25 +85,30 @@
 - [x] Bank details from Settings
 - [x] Receipt upload (JPG/PNG ≤5MB, server-side validate)
 - [x] Tracking link display
+- [x] Copy link button (CopyButton: generic value/path/label/className props)
 - [x] Order summary
 - [x] Upload success/error states
+- [x] Hapus tombol "Pesanan Saya" (no customer accounts, misleading)
 
 ## Phase 9: Buyer — Tracking Page ✅ DONE
 
 - [x] Tracking page (`/track/[trackingId]`)
 - [x] Timeline (5 steps + expired state) — overall order progress
+- [x] Status hero block (icon + status label h1 + contextual note) at top of page
 - [x] Per-batch mini-timelines (Diproses → Siap → Selesai) once payment confirmed
 - [x] No personal data exposed
 - [x] Upload prompt when status = WAITING_PAYMENT (via order confirmation page)
 - [x] Re-upload warning banner when admin requested re-upload
 - [x] Invalid/expired link state
 - [x] Lazy auto-expire on tracking page read
+- [x] Fix: COMPLETED status now shows all steps done (was showing "Sedang berlangsung" on Selesai)
 
 ## Phase 10: Admin — Order Management ✅ DONE
 
 - [x] Orders list (`/admin/orders`) with filters (all, need verification, active)
 - [x] Order detail (`/admin/orders/[id]`)
-- [x] Receipt preview (image served via API route)
+- [x] Receipt preview (image served via `/api/uploads/[filename]` route, admin-only auth)
+- [x] Fix: receipt serving route was missing (404), now created with admin auth + path traversal protection
 - [x] Confirm payment → PAYMENT_CONFIRMED + create FulfillmentGroups (one per PoBatch) (disabled if no receipt)
 - [x] Request re-upload → stay WAITING_PAYMENT, clear receipt
 - [x] Per-batch status advance (forward only) via advanceFulfillmentGroup
@@ -182,8 +190,18 @@ batch tracks its own fulfillment progress independently. Payment stays shared
 
 ## Notes
 
-- Logo assets: `public/` (RasaRisa_Navbar.svg, RasaRisa_Logo_Monochrome.svg, RasaRisa_Favicon.svg)
+- Logo assets: `public/` (logo-horizontal.svg, logo-mono-light.svg, favicon.svg) + `asset_logo/` (source SVGs)
 - Design doc: `docs/superpowers/specs/2026-10-19-rasarisa-design.md`
 - Architecture: `ARCHITECTURE.md`
 - GitHub: https://github.com/a22riz/RasaRisa-v2
 - DB integration tests: `RUN_DB_TESTS=1 npx vitest run src/server/orders.test.ts` (need dev DB up)
+
+## Recent UX Changes (21 Oct 2026)
+
+- Hero: 2-col grid (text left, "Cara pesan" 3-step how-to card right) instead of centered text
+- PO chips: extracted to `PoChipSelector` client component with `useState` for active tracking
+- Checkout: 2-step flow (Opsi Pengiriman → Checkout), WA admin contact for delivery pre-check
+- Fulfillment: 2 options in checkout UI (Antar ke Rumah, Ambil Sendiri). COD_DELIVERY kept in schema/validation for existing orders
+- Tracking: status hero block (icon + label + contextual note), stepNote moved from timeline to hero
+- CopyButton: generic (value/path/label/className props), used for bank account + tracking link
+- Removed "Pesanan Saya" button from order confirmation topbar (no customer accounts)
