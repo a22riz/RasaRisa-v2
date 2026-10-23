@@ -55,5 +55,8 @@ coverage/
 prisma/migrations/dev.db*
 src/generated/
 
+# graphify (generated knowledge graph)
+graphify-out/
+
 # superpowers brainstorm (throwaway)
 .superpowers/
