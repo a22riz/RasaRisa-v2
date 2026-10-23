@@ -7,5 +7,5 @@ interface LogoProps {
 // variant="light": monochrome cream (background gelap, admin sidebar).
 export function Logo({ variant = "dark", className }: LogoProps) {
   const src = variant === "light" ? "/logo-mono-light.svg" : "/logo-horizontal.svg";
-  return <img src={src} alt="RasaRisa, lauk siap saji" className={className} />;
+  return <img src={src} alt="RasaRisa, Makan Praktis, Enak, Tanpa Ribet!" className={className} />;
 }

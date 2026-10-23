@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "RasaRisa",
-  description: "Makan enak, tanpa ribet.",
+  description: "Makan Praktis, Enak, Tanpa Ribet!",
   icons: {
     icon: "/favicon.svg",
   },

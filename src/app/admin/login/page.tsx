@@ -12,7 +12,7 @@ export default async function AdminLoginPage() {
         <div className="rr-login-brand-inner">
           <Logo variant="light" />
           <p className="rr-login-tagline">
-            Lauk siap saji, <span className="rr-login-accent">tanpa ribet</span>
+            Makan Praktis, Enak, <span className="rr-login-accent">Tanpa Ribet!</span>
           </p>
           <p className="rr-login-support">
             Dapur rumahan untuk tetangga sekitar. Masuk untuk mengelola pesanan, pre-order, dan

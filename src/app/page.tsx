@@ -43,7 +43,7 @@ export default async function CatalogPage() {
               </div>
             )}
             <h1 className="font-serif font-bold leading-tight mb-3.5 text-[2rem] md:text-[2.75rem]">
-              Makanan rumahan, <span className="text-tomato italic">diantar ke rumah.</span>
+              Makan Praktis, Enak, <span className="text-tomato italic">Tanpa Ribet!</span>
             </h1>
             <p className="text-ink-muted text-lg mb-5.5 max-w-[480px]">
               Pesan hari ini, kami masak fresh, antar sesuai jadwal yang kamu pilih. Tanpa repot
