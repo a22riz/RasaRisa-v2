@@ -1,4 +1,4 @@
-FROM node:22-alpine AS base
+FROM node:22.23.4-alpine AS base
 RUN apk add --no-cache libc6-compat openssl
 
 # --- deps ---
@@ -29,14 +29,10 @@ RUN mkdir -p /run/postgresql && chown postgres:postgres /run/postgresql
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/tsx ./node_modules/tsx
-COPY --from=builder /app/node_modules/esbuild ./node_modules/esbuild
-COPY --from=builder /app/node_modules/@esbuild ./node_modules/@esbuild
-COPY --from=builder /app/node_modules/bcryptjs ./node_modules/bcryptjs
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
+COPY --from=builder /app/src/generated/prisma ./src/generated/prisma
 
 COPY docker-entrypoint.sh /app/docker-entrypoint.sh
 RUN chmod +x /app/docker-entrypoint.sh

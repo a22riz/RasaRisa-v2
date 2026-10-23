@@ -53,6 +53,7 @@ coverage/
 
 # prisma
 prisma/migrations/dev.db*
+src/generated/
 
 # superpowers brainstorm (throwaway)
 .superpowers/
